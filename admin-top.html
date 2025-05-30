@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>管理者ログイン - 51815</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>51815 管理者ログイン</h1>
+  <form id="login-form">
+    <input type="email" id="email" placeholder="メールアドレス" required><br>
+    <input type="password" id="password" placeholder="パスワード" required><br>
+    <button type="submit">ログイン</button>
+  </form>
+  <div id="message"></div>
+
+  <script>
+    const SUPABASE_URL = "https://odpjnxcyvcmivmccxtyo.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kcGpueGN5dmNtaXZtY2N4dHlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2MjI0MjQsImV4cCI6MjA2NDE5ODQyNH0.uGSV1BPGvjcjGTtYOg0TwCarGTgdZeVWULSbdis_hsA";
+  </script>
+  <script type="module" src="admin-login.js"></script>
+</body>
+</html>
