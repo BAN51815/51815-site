@@ -1,0 +1,5 @@
+body { font-family: sans-serif; padding: 1em; background: #f8f8f8; }
+header { background: #222; color: #fff; padding: 1em; }
+nav button { margin: 0.2em; padding: 0.5em 1em; }
+main { background: #fff; padding: 1em; margin-top: 1em; border-radius: 6px; }
+form input, form button { margin: 0.2em; padding: 0.5em; }
