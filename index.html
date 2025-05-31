@@ -10,11 +10,11 @@
 <body>
   <header>
     <div class="logo">51815</div>
-    <nav class="nav" id="nav">
-      <button class="hamburger" id="menu-toggle">☰</button>
-      <div class="menu" id="menu-container">読み込み中...</div>
-    </nav>
+    <button class="hamburger" id="menu-toggle">☰</button>
+    <nav class="drawer" id="drawer-menu"></nav>
   </header>
+
+  <div class="menu-row" id="menu-container">読み込み中...</div>
 
   <main>
     <div id="content">ここにコンテンツが表示されます</div>
@@ -27,7 +27,7 @@
   <script type="module" src="menu.js"></script>
   <script>
     document.getElementById("menu-toggle").addEventListener("click", () => {
-      document.getElementById("menu-container").classList.toggle("open");
+      document.getElementById("drawer-menu").classList.toggle("open");
     });
   </script>
 </body>
