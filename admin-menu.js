@@ -1,31 +1,31 @@
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>管理メニュー</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      padding: 2rem;
-      background-color: #f0f0f0;
-    }
-    h1 {
-      color: #333;
-    }
-  </style>
-</head>
-<body>
-  <h1>管理メニュー</h1>
-  <p>このページは管理者のみがアクセスできます。</p>
+const supabase = createClient("https://odpjnxcyvcmivmccxtyo.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kcGpueGN5dmNtaXZtY2N4dHlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2MjI0MjQsImV4cCI6MjA2NDE5ODQyNH0.uGSV1BPGvjcjGTtYOg0TwCarGTgdZeVWULSbdis_hsA");
 
-  <script>
-    // 認証チェック
-    if (localStorage.getItem("admin_auth") !== "true") {
-      alert("管理者としてログインしてください");
-      window.location.href = "admin-top.html";
-    }
-  </script>
-</body>
-</html>
+async function loadMenu() {
+  const container = document.getElementById("menu-container");
+  const content = document.getElementById("content");
+  const { data, error } = await supabase
+    .from("menus")
+    .select("*")
+    .eq("is_visible", true)
+    .order("order");
+
+  if (error) {
+    container.innerHTML = "メニュー読み込み失敗";
+    console.error(error);
+    return;
+  }
+
+  container.innerHTML = "";
+  data.forEach(item => {
+    const btn = document.createElement("button");
+    btn.textContent = item.title;
+    btn.onclick = () => {
+      content.innerHTML = `<h2>$\{item.title}</h2><p>ここに「$\{item.path}」の中身を表示</p>`;
+    };
+    container.appendChild(btn);
+  });
+}
+
+loadMenu();
