@@ -22,7 +22,7 @@
 
   <script>
     // 認証チェック
-    if (localStorage.getItem("carelay_admin_auth") !== "true") {
+    if (localStorage.getItem("admin_auth") !== "true") {
       alert("管理者としてログインしてください");
       window.location.href = "admin-top.html";
     }
