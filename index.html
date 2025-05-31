@@ -6,6 +6,34 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>51815</title>
   <link rel="stylesheet" href="style.css" />
+  <style>
+    /* モバイル用ドロワー表示調整 */
+    .drawer {
+      display: none;
+      flex-direction: column;
+      background: #f2f2f2;
+      position: absolute;
+      top: 60px;
+      left: 0;
+      width: 100%;
+      z-index: 999;
+      padding: 1rem;
+    }
+    .drawer.open {
+      display: flex;
+      animation: slideIn 0.3s ease-out forwards;
+    }
+    @keyframes slideIn {
+      from { transform: translateY(-20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .drawer button {
+      margin: 0.5rem 0;
+      padding: 0.5rem;
+      width: 100%;
+      text-align: left;
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -23,15 +51,65 @@
     <div id="content">ここにコンテンツが表示されます</div>
   </main>
 
-  <script>
-    const SUPABASE_URL = "https://odpjnxcyvcmivmccxtyo.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kcGpueGN5dmNtaXZtY2N4dHlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2MjI0MjQsImV4cCI6MjA2NDE5ODQyNH0.uGSV1BPGvjcjGTtYOg0TwCarGTgdZeVWULSbdis_hsA";
-  </script>
-  <script type="module" src="menu.js"></script>
-  <script>
-    document.getElementById("menu-toggle").addEventListener("click", () => {
-      document.getElementById("drawer-menu").classList.toggle("open");
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+    const supabase = createClient(
+      "https://odpjnxcyvcmivmccxtyo.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kcGpueGN5dmNtaXZtY2N4dHlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2MjI0MjQsImV4cCI6MjA2NDE5ODQyNH0.uGSV1BPGvjcjGTtYOg0TwCarGTgdZeVWULSbdis_hsA"
+    );
+
+    const menuContainer = document.getElementById("menu-container");
+    const drawerMenu = document.getElementById("drawer-menu");
+    const content = document.getElementById("content");
+
+    async function loadMenu() {
+      const { data, error } = await supabase.from("menus").select("*").eq("is_visible", true).order("order");
+      if (error) {
+        menuContainer.innerHTML = "メニュー読み込み失敗";
+        drawerMenu.innerHTML = "メニュー読み込み失敗";
+        console.error(error);
+        return;
+      }
+
+      menuContainer.innerHTML = "";
+      drawerMenu.innerHTML = "";
+
+      // ☰閉じるボタン（スマホ用）
+      const closeBtn = document.createElement("div");
+      closeBtn.textContent = "☰";
+      closeBtn.style.padding = "1rem";
+      closeBtn.style.cursor = "pointer";
+      closeBtn.style.fontSize = "1.5rem";
+      closeBtn.addEventListener("click", () => drawerMenu.classList.remove("open"));
+      drawerMenu.appendChild(closeBtn);
+
+      data.forEach((item) => {
+        const btn = document.createElement("button");
+        btn.textContent = item.title;
+        btn.onclick = () => {
+          content.innerHTML = `<h2>${item.title}</h2><p>ここに「${item.path}」の中身を表示</p>`;
+          drawerMenu.classList.remove("open");
+        };
+        const clone = btn.cloneNode(true);
+        menuContainer.appendChild(btn);
+        drawerMenu.appendChild(clone);
+      });
+    }
+
+    document.getElementById("menu-toggle").addEventListener("click", (e) => {
+      drawerMenu.classList.toggle("open");
+      e.stopPropagation();
     });
+
+    document.addEventListener("click", (e) => {
+      if (drawerMenu.classList.contains("open") &&
+          !drawerMenu.contains(e.target) &&
+          e.target.id !== "menu-toggle") {
+        drawerMenu.classList.remove("open");
+      }
+    });
+
+    loadMenu();
   </script>
 </body>
 </html>
