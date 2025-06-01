@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>管理メニュー追加</title>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; background: #f9f9f9; }
+    h1 { font-size: 1.5rem; margin-bottom: 1rem; }
+    input, button { padding: 0.5rem; margin: 0.25rem; }
+    table { width: 100%; border-collapse: collapse; background: #fff; margin-top: 1rem; }
+    th, td { padding: 0.5rem; border: 1px solid #ccc; }
+    th { background: #eee; }
+    tbody tr:hover { background: #f0f0f0; }
+    .actions button { margin-right: 0.25rem; }
+  </style>
+</head>
+<body>
+  <h1>管理メニュー追加・編集・削除</h1>
+
+  <div>
+    <input type="text" id="new-title" placeholder="タイトル" />
+    <input type="text" id="new-path" placeholder="HTMLファイル名 (例: admin-blog.html)" />
+    <input type="number" id="new-order" placeholder="順番" />
+    <button id="add-button">追加</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>タイトル</th>
+        <th>パス</th>
+        <th>順番</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody id="menu-body"></tbody>
+  </table>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+    const supabase = createClient(
+      'https://odpjnxcyvcmivmccxtyo.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kcGpueGN5dmNtaXZtY2N4dHlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2MjI0MjQsImV4cCI6MjA2NDE5ODQyNH0.uGSV1BPGvjcjGTtYOg0TwCarGTgdZeVWULSbdis_hsA'
+    );
+
+    const body = document.getElementById("menu-body");
+
+    async function loadMenus() {
+      const { data, error } = await supabase.from("admin_menus").select("*").order("order");
+      if (error) return alert("読み込み失敗");
+
+      body.innerHTML = "";
+      data.forEach(item => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td><input value="${item.title}" data-id="${item.id}" data-field="title" /></td>
+          <td><input value="${item.path}" data-id="${item.id}" data-field="path" /></td>
+          <td><input type="number" value="${item.order}" data-id="${item.id}" data-field="order" /></td>
+          <td class="actions">
+            <button class="update" data-id="${item.id}">保存</button>
+            <button class="delete" data-id="${item.id}">削除</button>
+          </td>
+        `;
+        body.appendChild(row);
+      });
+    }
+
+    document.getElementById("add-button").addEventListener("click", async () => {
+      const title = document.getElementById("new-title").value;
+      const path = document.getElementById("new-path").value;
+      const order = parseInt(document.getElementById("new-order").value);
+      if (!title || !path || isNaN(order)) return alert("すべて入力してください");
+      await supabase.from("admin_menus").insert([{ title, path, order }]);
+      document.getElementById("new-title").value = "";
+      document.getElementById("new-path").value = "";
+      document.getElementById("new-order").value = "";
+      loadMenus();
+    });
+
+    body.addEventListener("click", async (e) => {
+      const id = e.target.dataset.id;
+      if (e.target.classList.contains("update")) {
+        const inputs = body.querySelectorAll(`[data-id='${id}']`);
+        const updated = {};
+        inputs.forEach(input => {
+          updated[input.dataset.field] = input.type === "number" ? parseInt(input.value) : input.value;
+        });
+        await supabase.from("admin_menus").update(updated).eq("id", id);
+        loadMenus();
+      } else if (e.target.classList.contains("delete")) {
+        if (confirm("このメニューを削除しますか？")) {
+          await supabase.from("admin_menus").delete().eq("id", id);
+          loadMenus();
+        }
+      }
+    });
+
+    loadMenus();
+  </script>
+</body>
+</html>
