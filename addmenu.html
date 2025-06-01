@@ -31,7 +31,7 @@ const { data: authUser, error: authError } = await supabase.auth.getUser();
 console.log("🔑 認証チェック結果：", authUser);
 if (!authUser?.user) {
   console.warn("🚫 未ログイン。リダイレクトします");
-  location.href = "admin-login.html";
+  location.href = "admin-top.html";
 }
 
 loadMenu();
