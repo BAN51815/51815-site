@@ -12,8 +12,25 @@
   <label for="tags">タグ（カンマ区切り）</label>
   <input type="text" id="tags" placeholder="例: 副業,介護,起業">
 
+  <label for="thumbnail_url">サムネイル画像URL</label>
+  <input type="text" id="thumbnail_url" placeholder="https://...jpg">
+
+  <label for="slug">カスタムスラッグ（任意）</label>
+  <input type="text" id="slug" placeholder="custom-url-slug">
+
+  <div class="visibility-row">
+    <label for="is_visible">公開する</label>
+    <input type="checkbox" id="is_visible" checked>
+  </div>
+
   <label for="editor">本文</label>
   <div id="editor">ここに本文を書いてください...</div>
+
+  <label for="thumbnail_url">サムネイル画像URL</label>
+  <input type="text" id="thumbnail_url" placeholder="https://...jpg">
+
+  <label for="slug">カスタムスラッグ（任意）</label>
+  <input type="text" id="slug" placeholder="custom-url-slug">
 
   <div class="visibility-row">
     <label for="is_visible">公開する</label>
@@ -103,10 +120,12 @@
       return;
     }
 
-    const slug = title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '');
+    let slug = document.getElementById('slug').value.trim();
+    if (!slug) slug = title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '');
 
+    const thumbnail_url = document.getElementById("thumbnail_url").value.trim();
     const { error } = await supabase.from("blogs").insert([{
-      title, category, tags, is_visible, body, slug
+      title, category, tags, is_visible, body, slug, thumbnail_url
     }]);
 
     if (error) {
