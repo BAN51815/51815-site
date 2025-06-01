@@ -1,3 +1,8 @@
+const authFlag = localStorage.getItem('admin_auth');
+if (authFlag !== 'true') {
+  window.location.href = 'admin-top.html';
+}
+
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 const supabase = createClient("https://odpjnxcyvcmivmccxtyo.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kcGpueGN5dmNtaXZtY2N4dHlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2MjI0MjQsImV4cCI6MjA2NDE5ODQyNH0.uGSV1BPGvjcjGTtYOg0TwCarGTgdZeVWULSbdis_hsA";
 
@@ -8,7 +13,6 @@ async function loadAdminMenu() {
   const { data, error } = await supabase
     .from("admin_menus")
     .select("*")
-    .eq("is_admin_menu", true)
     .order("order");
 
   if (error) {
