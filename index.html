@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -56,16 +57,21 @@
       }
 
       menuContainer.innerHTML = "";
-      // closeBtn は保持
       drawerMenu.innerHTML = "";
       drawerMenu.appendChild(closeBtn);
 
       data.forEach((item) => {
         const btn = document.createElement("button");
         btn.textContent = item.title;
-        btn.onclick = () => {
-          content.innerHTML = `<h2>${item.title}</h2><p>ここに「${item.path}」の中身を表示</p>`;
-          drawerMenu.classList.remove("open");
+        btn.onclick = async () => {
+          try {
+            const res = await fetch(item.path);
+            const html = await res.text();
+            content.innerHTML = html;
+            drawerMenu.classList.remove("open");
+          } catch (e) {
+            content.innerHTML = `<p>コンテンツの読み込みに失敗しました。</p>`;
+          }
         };
         const clone = btn.cloneNode(true);
         clone.onclick = btn.onclick;
