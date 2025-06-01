@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -38,11 +37,6 @@
   </table>
 
   <script type="module">
-    const authFlag = localStorage.getItem('admin_auth');
-    if (authFlag !== 'true') {
-      window.location.href = 'admin-top.html';
-    }
-
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
     const supabase = createClient(
       'https://odpjnxcyvcmivmccxtyo.supabase.co',
