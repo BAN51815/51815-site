@@ -124,6 +124,12 @@
     });
 
     loadMenu();
+// blog.html 側からのカスタムイベントを受け取る
+window.addEventListener("load-blog-detail", async (e) => {
+  const slug = e.detail;
+  await loadPage(`blog-detail.html?slug=${slug}`);
+});
+
   </script>
 </body>
 </html>
