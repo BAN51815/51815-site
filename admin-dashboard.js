@@ -6,7 +6,7 @@ const contentArea = document.getElementById("content-area");
 
 async function loadAdminMenu() {
   const { data, error } = await supabase
-    .from("menus")
+    .from("admin_menus")
     .select("*")
     .eq("is_admin_menu", true)
     .order("order");
