@@ -1,0 +1,54 @@
+<h2>ブログ一覧</h2>
+<div id="blog-list"></div>
+
+<style>
+  #blog-list { display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1rem; }
+  .blog-card { padding: 1rem; border: 1px solid #ccc; border-radius: 6px; background: #fff; }
+  .blog-card h3 { margin: 0; font-size: 1.2rem; }
+  .blog-card p.meta { font-size: 0.85rem; color: #666; margin: 0.5rem 0; }
+  .blog-card .thumb { max-width: 100%; height: auto; margin-top: 0.5rem; }
+  .blog-card .excerpt { margin-top: 0.5rem; font-size: 0.95rem; }
+</style>
+
+<script type="module">
+  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+  const supabase = createClient(
+    "https://odpjnxcyvcmivmccxtyo.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kcGpueGN5dmNtaXZtY2N4dHlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2MjI0MjQsImV4cCI6MjA2NDE5ODQyNH0.uGSV1BPGvjcjGTtYOg0TwCarGTgdZeVWULSbdis_hsA"
+  );
+
+  const container = document.getElementById("blog-list");
+
+  async function loadPosts() {
+    const { data, error } = await supabase
+      .from("blogs")
+      .select("*")
+      .eq("is_visible", true)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      container.innerHTML = "<p>記事の読み込みに失敗しました。</p>";
+      console.error(error);
+      return;
+    }
+
+    if (!data.length) {
+      container.innerHTML = "<p>公開中のブログ記事はありません。</p>";
+      return;
+    }
+
+    data.forEach(post => {
+      const div = document.createElement("div");
+      div.className = "blog-card";
+      div.innerHTML = `
+        <h3><a href="blog-detail.html?slug=${encodeURIComponent(post.slug)}">${post.title}</a></h3>
+        <p class="meta">${post.category || "未分類"}｜${new Date(post.created_at).toLocaleDateString()}</p>
+        ${post.thumbnail_url ? `<img class="thumb" src="${post.thumbnail_url}" alt="thumbnail">` : ""}
+        <p class="excerpt">${(post.body || "").replace(/<[^>]+>/g, "").slice(0, 100)}...</p>
+      `;
+      container.appendChild(div);
+    });
+  }
+
+  loadPosts();
+</script>
