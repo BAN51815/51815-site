@@ -9,16 +9,13 @@ form.addEventListener("submit", async (e) => {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email, password
-  });
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
     msg.textContent = "ログイン失敗：" + error.message;
     return;
   }
 
-  // 認証成功 → フラグ保存して管理画面に進む
   localStorage.setItem("admin_auth", "true");
-  window.location.href = "admin-menu.html";
+  window.location.href = "admin-dashboard.html";
 });
