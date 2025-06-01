@@ -35,7 +35,6 @@
     const content = document.getElementById("content");
     const toggle = document.getElementById("menu-toggle");
 
-    // ☰閉じるボタン（スマホ用）
     const closeBtn = document.createElement("div");
     closeBtn.textContent = "☰";
     closeBtn.style.padding = "1rem";
@@ -63,21 +62,52 @@
       data.forEach((item) => {
         const btn = document.createElement("button");
         btn.textContent = item.title;
-        btn.onclick = async () => {
-          try {
-            const res = await fetch(item.path);
-            const html = await res.text();
-            content.innerHTML = html;
-            drawerMenu.classList.remove("open");
-          } catch (e) {
-            content.innerHTML = `<p>コンテンツの読み込みに失敗しました。</p>`;
-          }
-        };
+        btn.onclick = () => loadPage(item.path);
         const clone = btn.cloneNode(true);
         clone.onclick = btn.onclick;
         menuContainer.appendChild(btn);
         drawerMenu.appendChild(clone);
       });
+    }
+
+    async function loadPage(path) {
+      try {
+        const res = await fetch(path);
+        const html = await res.text();
+        content.innerHTML = html;
+        drawerMenu.classList.remove("open");
+
+        // 再実行 <script type="module">
+        const moduleScripts = content.querySelectorAll("script[type='module']");
+        moduleScripts.forEach(old => {
+          const s = document.createElement("script");
+          s.type = "module";
+          s.textContent = old.textContent;
+          document.body.appendChild(s);
+        });
+
+        // 再実行 <script src="...">
+        const externalScripts = content.querySelectorAll("script[src]");
+        externalScripts.forEach(old => {
+          const s = document.createElement("script");
+          s.src = old.src;
+          document.body.appendChild(s);
+        });
+
+        // ブログ記事リンクも対応（再バインド）
+        content.querySelectorAll(".blog-card a[href^='blog-detail.html']").forEach(link => {
+          link.addEventListener("click", async e => {
+            e.preventDefault();
+            const url = new URL(link.href);
+            const slug = url.searchParams.get("slug");
+            if (slug) await loadPage(`blog-detail.html?slug=${encodeURIComponent(slug)}`);
+          });
+        });
+
+      } catch (err) {
+        content.innerHTML = `<p>ページ読み込み失敗</p>`;
+        console.error(err);
+      }
     }
 
     toggle.addEventListener("click", (e) => {
