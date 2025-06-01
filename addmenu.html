@@ -4,7 +4,6 @@
   <div class="mb-4 flex gap-2">
     <input id="title-input" placeholder="タイトル" class="border p-1 rounded w-40">
     <input id="path-input" placeholder="パス" class="border p-1 rounded w-40">
-    <input id="icon-input" placeholder="アイコン（例：📁）" class="border p-1 rounded w-32">
     <button id="add-button" class="bg-blue-500 text-white px-3 py-1 rounded">追加</button>
   </div>
   <table class="w-full border text-sm">
@@ -12,7 +11,6 @@
       <tr>
         <th class="border px-2 py-1">タイトル</th>
         <th class="border px-2 py-1">パス</th>
-        <th class="border px-2 py-1">アイコン</th>
         <th class="border px-2 py-1">操作</th>
       </tr>
     </thead>
@@ -37,12 +35,15 @@ async function loadMenu() {
   const { data, error } = await supabase.from("admin_menus").select("*").order("order", { ascending: true });
   const table = document.getElementById("menu-table");
   table.innerHTML = "";
+  if (error) {
+    console.error("読み込みエラー:", error);
+    return;
+  }
   data.forEach((item) => {
     const row = document.createElement("tr");
     row.innerHTML = `
       <td class="border px-2 py-1"><input value="${item.title}" class="border rounded w-full px-1 py-0.5" data-id="${item.id}" data-field="title"></td>
       <td class="border px-2 py-1"><input value="${item.path}" class="border rounded w-full px-1 py-0.5" data-id="${item.id}" data-field="path"></td>
-      <td class="border px-2 py-1"><input value="${item.icon}" class="border rounded w-full px-1 py-0.5" data-id="${item.id}" data-field="icon"></td>
       <td class="border px-2 py-1 text-center">
         <button class="bg-green-500 text-white px-2 py-0.5 rounded save-button" data-id="${item.id}">保存</button>
         <button class="bg-red-500 text-white px-2 py-0.5 rounded delete-button" data-id="${item.id}">削除</button>
@@ -56,8 +57,7 @@ async function loadMenu() {
       const id = btn.dataset.id;
       const title = document.querySelector(`input[data-id='${id}'][data-field='title']`).value;
       const path = document.querySelector(`input[data-id='${id}'][data-field='path']`).value;
-      const icon = document.querySelector(`input[data-id='${id}'][data-field='icon']`).value;
-      await supabase.from("admin_menus").update({ title, path, icon }).eq("id", id);
+      await supabase.from("admin_menus").update({ title, path }).eq("id", id);
       loadMenu();
     });
   });
@@ -76,12 +76,10 @@ async function loadMenu() {
 document.getElementById("add-button").addEventListener("click", async () => {
   const title = document.getElementById("title-input").value;
   const path = document.getElementById("path-input").value;
-  const icon = document.getElementById("icon-input").value;
   if (!title || !path) return alert("タイトルとパスは必須です");
-  await supabase.from("admin_menus").insert({ title, path, icon });
+  await supabase.from("admin_menus").insert({ title, path });
   document.getElementById("title-input").value = "";
   document.getElementById("path-input").value = "";
-  document.getElementById("icon-input").value = "";
   loadMenu();
 });
 </script>
