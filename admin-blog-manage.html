@@ -5,6 +5,8 @@
       <th>タイトル</th>
       <th>カテゴリ</th>
       <th>タグ</th>
+      <th>スラッグ</th>
+      <th>サムネイルURL</th>
       <th>公開</th>
       <th>作成日</th>
       <th>操作</th>
@@ -42,7 +44,7 @@
       .order("created_at", { ascending: false });
 
     if (error) {
-      tbody.innerHTML = "<tr><td colspan='6'>読み込み失敗</td></tr>";
+      tbody.innerHTML = "<tr><td colspan='8'>読み込み失敗</td></tr>";
       console.error(error);
       return;
     }
@@ -54,6 +56,8 @@
         <td><input type="text" value="${row.title}" data-id="${row.id}" data-field="title"></td>
         <td><input type="text" value="${row.category}" data-id="${row.id}" data-field="category"></td>
         <td><input type="text" value="${row.tags || ""}" data-id="${row.id}" data-field="tags"></td>
+        <td><input type="text" value="${row.slug || ""}" data-id="${row.id}" data-field="slug"></td>
+        <td><input type="text" value="${row.thumbnail_url || ""}" data-id="${row.id}" data-field="thumbnail_url"></td>
         <td><input type="checkbox" data-id="${row.id}" data-field="is_visible" ${row.is_visible ? "checked" : ""}></td>
         <td>${new Date(row.created_at).toLocaleString()}</td>
         <td>
