@@ -1,0 +1,92 @@
+<h2>ブログ記事一覧</h2>
+<table>
+  <thead>
+    <tr>
+      <th>タイトル</th>
+      <th>カテゴリ</th>
+      <th>タグ</th>
+      <th>公開</th>
+      <th>作成日</th>
+      <th>操作</th>
+    </tr>
+  </thead>
+  <tbody id="blog-list"></tbody>
+</table>
+
+<style>
+  table { width: 100%; border-collapse: collapse; margin-top: 1rem; background: #fff; }
+  th, td { padding: 0.5rem; border: 1px solid #ccc; text-align: left; }
+  th { background: #eee; }
+  td input[type="text"] { width: 100%; padding: 0.25rem; }
+  td input[type="checkbox"] { transform: scale(1.2); }
+  button { margin-right: 0.5rem; padding: 0.25rem 0.75rem; }
+</style>
+
+<script type="module">
+  if (localStorage.getItem("admin_auth") !== "true") {
+    window.location.href = "admin-top.html";
+  }
+
+  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+  const supabase = createClient(
+    "https://odpjnxcyvcmivmccxtyo.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kcGpueGN5dmNtaXZtY2N4dHlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2MjI0MjQsImV4cCI6MjA2NDE5ODQyNH0.uGSV1BPGvjcjGTtYOg0TwCarGTgdZeVWULSbdis_hsA"
+  );
+
+  const tbody = document.getElementById("blog-list");
+
+  async function loadBlogs() {
+    const { data, error } = await supabase
+      .from("blogs")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      tbody.innerHTML = "<tr><td colspan='6'>読み込み失敗</td></tr>";
+      console.error(error);
+      return;
+    }
+
+    tbody.innerHTML = "";
+    data.forEach(row => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><input type="text" value="${row.title}" data-id="${row.id}" data-field="title"></td>
+        <td><input type="text" value="${row.category}" data-id="${row.id}" data-field="category"></td>
+        <td><input type="text" value="${row.tags || ""}" data-id="${row.id}" data-field="tags"></td>
+        <td><input type="checkbox" data-id="${row.id}" data-field="is_visible" ${row.is_visible ? "checked" : ""}></td>
+        <td>${new Date(row.created_at).toLocaleString()}</td>
+        <td>
+          <button onclick="updateRow(${row.id})">保存</button>
+          <button onclick="deleteRow(${row.id})">削除</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  window.updateRow = async (id) => {
+    const inputs = document.querySelectorAll('[data-id="' + id + '"]');
+    const updateData = {};
+    inputs.forEach(input => {
+      const field = input.dataset.field;
+      if (input.type === "checkbox") {
+        updateData[field] = input.checked;
+      } else {
+        updateData[field] = input.value;
+      }
+    });
+    const { error } = await supabase.from("blogs").update(updateData).eq("id", id);
+    if (error) alert("更新失敗: " + error.message);
+    else loadBlogs();
+  };
+
+  window.deleteRow = async (id) => {
+    if (!confirm("この投稿を削除しますか？")) return;
+    const { error } = await supabase.from("blogs").delete().eq("id", id);
+    if (error) alert("削除失敗: " + error.message);
+    else loadBlogs();
+  };
+
+  loadBlogs();
+</script>
