@@ -1,24 +1,42 @@
 
 <main class="p-4">
-  <h1 class="text-xl font-bold mb-4">管理メニュー追加・編集・削除（デバッグモード）</h1>
-  <div class="mb-4 flex gap-2">
-    <input id="title-input" placeholder="タイトル" class="border p-1 rounded w-72">
-    <input id="path-input" placeholder="パス" class="border p-1 rounded w-72">
-    <button id="add-button" class="bg-blue-500 text-white px-3 py-1 rounded">追加</button>
-  </div>
-  <table class="w-full border text-sm">
-    <thead class="bg-gray-100">
-      <tr>
-        <th class="border px-2 py-1">タイトル</th>
-        <th class="border px-2 py-1">パス</th>
-        <th class="border px-2 py-1">操作</th>
-      </tr>
-    </thead>
-    <tbody id="menu-table"></tbody>
-  </table>
+<h1 class="text-xl font-bold mb-4">管理メニュー追加・編集・削除（デバッグモード）</h1>
+<div class="mb-4 flex gap-2">
+<input class="border p-1 rounded w-72" id="title-input" placeholder="タイトル"/>
+<input class="border p-1 rounded w-72" id="path-input" placeholder="パス"/>
+<button class="bg-blue-500 text-white px-3 py-1 rounded" id="add-button">追加</button>
+</div>
+<table class="w-full border text-sm">
+<thead class="bg-gray-100">
+<tr>
+<th class="border px-2 py-1">タイトル</th>
+<th class="border px-2 py-1">パス</th>
+<th class="border px-2 py-1">操作</th>
+</tr>
+</thead>
+<tbody id="menu-table"></tbody>
+</table>
 </main>
-
 <script type="module">
+console.log("✅ JSモジュール開始");
+
+try {
+  const supabase = createClient("https://odpjnxcyvcmivmccxtyo.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kcGpueGN5dmNtaXZtY2N4dHlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU5ODk1NzgsImV4cCI6MjA2MTU2NTU3OH0.dqy_L8iPlbUDoozkha4yjar4ADvinxGc0a6ygSuBLQI");
+  console.log("✅ Supabase 初期化完了");
+
+  const user = await supabase.auth.getUser();
+  console.log("✅ ユーザー取得:", user);
+
+  const { data, error } = await supabase.from("admin_menus").select("*");
+  console.log("✅ データ取得結果:", data);
+  if (error) console.error("❌ Supabaseエラー:", error);
+  if (!data || data.length === 0) console.warn("⚠ データが空です");
+
+} catch (err) {
+  console.error("❌ 例外エラー:", err);
+}
+
+
 console.log("✅ JS開始：モジュールスクリプト動作中");
 
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
