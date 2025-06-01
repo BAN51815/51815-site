@@ -3,8 +3,9 @@
 
 <style>
   #blog-list { display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1rem; }
-  .blog-card { padding: 1rem; border: 1px solid #ccc; border-radius: 6px; background: #fff; }
-  .blog-card h3 { margin: 0; font-size: 1.2rem; }
+  .blog-card { padding: 1rem; border: 1px solid #ccc; border-radius: 6px; background: #fff; cursor: pointer; }
+  .blog-card h3 { margin: 0; font-size: 1.2rem; color: #006; text-decoration: underline; }
+  .blog-card:hover { background: #f4f4f4; }
   .blog-card p.meta { font-size: 0.85rem; color: #666; margin: 0.5rem 0; }
   .blog-card .thumb { max-width: 100%; height: auto; margin-top: 0.5rem; }
   .blog-card .excerpt { margin-top: 0.5rem; font-size: 0.95rem; }
@@ -40,12 +41,17 @@
     data.forEach(post => {
       const div = document.createElement("div");
       div.className = "blog-card";
+      div.dataset.slug = post.slug;
       div.innerHTML = `
-        <h3><a href="blog-detail.html?slug=${encodeURIComponent(post.slug)}">${post.title}</a></h3>
+        <h3>${post.title}</h3>
         <p class="meta">${post.category || "未分類"}｜${new Date(post.created_at).toLocaleDateString()}</p>
         ${post.thumbnail_url ? `<img class="thumb" src="${post.thumbnail_url}" alt="thumbnail">` : ""}
         <p class="excerpt">${(post.body || "").replace(/<[^>]+>/g, "").slice(0, 100)}...</p>
       `;
+      div.addEventListener("click", () => {
+        const slug = encodeURIComponent(post.slug);
+        window.dispatchEvent(new CustomEvent("load-blog-detail", { detail: slug }));
+      });
       container.appendChild(div);
     });
   }
