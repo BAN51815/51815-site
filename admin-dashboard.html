@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
+<!-- 管理ダッシュボード（完全版） -->
 <head>
   <meta charset="UTF-8">
   <title>管理ダッシュボード - 51815</title>
@@ -57,16 +57,20 @@
         const html = await res.text();
         contentArea.innerHTML = html;
 
-        // script[type=module] を再実行
-        const scripts = contentArea.querySelectorAll("script[type='module']");
-        scripts.forEach(oldScript => {
+        // 再実行が必要な <script type="module">
+        const moduleScripts = contentArea.querySelectorAll("script[type='module']");
+        moduleScripts.forEach(old => {
           const newScript = document.createElement("script");
           newScript.type = "module";
-          if (oldScript.src) {
-            newScript.src = oldScript.src;
-          } else {
-            newScript.textContent = oldScript.textContent;
-          }
+          newScript.textContent = old.textContent;
+          document.body.appendChild(newScript);
+        });
+
+        // CDNなど <script src="..."> も再実行
+        const externalScripts = contentArea.querySelectorAll("script[src]");
+        externalScripts.forEach(old => {
+          const newScript = document.createElement("script");
+          newScript.src = old.src;
           document.body.appendChild(newScript);
         });
 
@@ -79,4 +83,3 @@
     loadAdminMenu();
   </script>
 </body>
-</html>
