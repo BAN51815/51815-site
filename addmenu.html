@@ -1,87 +1,87 @@
 
-<h1 style="margin-top:0;">管理メニュー追加・編集・削除</h1>
-
-<div style="margin-bottom: 1rem;">
-  <input type="text" id="new-title" placeholder="タイトル" />
-  <input type="text" id="new-path" placeholder="HTMLファイル名 (例: admin-blog.html)" />
-  <input type="number" id="new-order" placeholder="順番" />
-  <button id="add-button">追加</button>
-</div>
-
-<table style="width: 100%; border-collapse: collapse; background: #fff;">
-  <thead>
-    <tr>
-      <th style="padding: 0.5rem; border: 1px solid #ccc; background: #eee;">タイトル</th>
-      <th style="padding: 0.5rem; border: 1px solid #ccc; background: #eee;">パス</th>
-      <th style="padding: 0.5rem; border: 1px solid #ccc; background: #eee;">順番</th>
-      <th style="padding: 0.5rem; border: 1px solid #ccc; background: #eee;">操作</th>
-    </tr>
-  </thead>
-  <tbody id="menu-body"></tbody>
-</table>
+<main class="p-4">
+  <h1 class="text-xl font-bold mb-4">管理メニュー追加・編集・削除</h1>
+  <div class="mb-4 flex gap-2">
+    <input id="title-input" placeholder="タイトル" class="border p-1 rounded w-40">
+    <input id="path-input" placeholder="パス" class="border p-1 rounded w-40">
+    <input id="icon-input" placeholder="アイコン（例：📁）" class="border p-1 rounded w-32">
+    <button id="add-button" class="bg-blue-500 text-white px-3 py-1 rounded">追加</button>
+  </div>
+  <table class="w-full border text-sm">
+    <thead class="bg-gray-100">
+      <tr>
+        <th class="border px-2 py-1">タイトル</th>
+        <th class="border px-2 py-1">パス</th>
+        <th class="border px-2 py-1">アイコン</th>
+        <th class="border px-2 py-1">操作</th>
+      </tr>
+    </thead>
+    <tbody id="menu-table"></tbody>
+  </table>
+</main>
 
 <script type="module">
-  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-  const supabase = createClient(
-    'https://odpjnxcyvcmivmccxtyo.supabase.co',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kcGpueGN5dmNtaXZtY2N4dHlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2MjI0MjQsImV4cCI6MjA2NDE5ODQyNH0.uGSV1BPGvjcjGTtYOg0TwCarGTgdZeVWULSbdis_hsA'
-  );
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-  const body = document.getElementById("menu-body");
+const supabase = createClient(
+  "https://odpjnxcyvcmivmccxtyo.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kcGpueGN5dmNtaXZtY2N4dHlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTcwNTYxNDksImV4cCI6MjAzMjYzMjE0OX0.mEA8aT-Pa3UHgMQh19K5X82idAy28vv0ndWeClqRDLU"
+);
 
-  async function loadMenus() {
-    const { data, error } = await supabase.from("admin_menus").select("*").order("order");
-    if (error) {
-      console.error("読み込み失敗:", error);
-      return;
-    }
+const user = await supabase.auth.getUser();
+if (!user.data?.user) location.href = "admin-login.html";
 
-    console.log("取得成功:", data);
-    body.innerHTML = "";
-    data.forEach(item => {
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td style="border:1px solid #ccc; padding:0.5rem;"><input value="${item.title}" data-id="${item.id}" data-field="title" /></td>
-        <td style="border:1px solid #ccc; padding:0.5rem;"><input value="${item.path}" data-id="${item.id}" data-field="path" /></td>
-        <td style="border:1px solid #ccc; padding:0.5rem;"><input type="number" value="${item.order}" data-id="${item.id}" data-field="order" /></td>
-        <td style="border:1px solid #ccc; padding:0.5rem;">
-          <button class="update" data-id="${item.id}">保存</button>
-          <button class="delete" data-id="${item.id}">削除</button>
-        </td>
-      `;
-      body.appendChild(row);
+loadMenu();
+
+async function loadMenu() {
+  const { data, error } = await supabase.from("admin_menus").select("*").order("order", { ascending: true });
+  const table = document.getElementById("menu-table");
+  table.innerHTML = "";
+  data.forEach((item) => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td class="border px-2 py-1"><input value="${item.title}" class="border rounded w-full px-1 py-0.5" data-id="${item.id}" data-field="title"></td>
+      <td class="border px-2 py-1"><input value="${item.path}" class="border rounded w-full px-1 py-0.5" data-id="${item.id}" data-field="path"></td>
+      <td class="border px-2 py-1"><input value="${item.icon}" class="border rounded w-full px-1 py-0.5" data-id="${item.id}" data-field="icon"></td>
+      <td class="border px-2 py-1 text-center">
+        <button class="bg-green-500 text-white px-2 py-0.5 rounded save-button" data-id="${item.id}">保存</button>
+        <button class="bg-red-500 text-white px-2 py-0.5 rounded delete-button" data-id="${item.id}">削除</button>
+      </td>
+    `;
+    table.appendChild(row);
+  });
+
+  document.querySelectorAll(".save-button").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const id = btn.dataset.id;
+      const title = document.querySelector(`input[data-id='${id}'][data-field='title']`).value;
+      const path = document.querySelector(`input[data-id='${id}'][data-field='path']`).value;
+      const icon = document.querySelector(`input[data-id='${id}'][data-field='icon']`).value;
+      await supabase.from("admin_menus").update({ title, path, icon }).eq("id", id);
+      loadMenu();
     });
-  }
-
-  document.getElementById("add-button").addEventListener("click", async () => {
-    const title = document.getElementById("new-title").value;
-    const path = document.getElementById("new-path").value;
-    const order = parseInt(document.getElementById("new-order").value);
-    if (!title || !path || isNaN(order)) return alert("すべて入力してください");
-    await supabase.from("admin_menus").insert([{ title, path, order }]);
-    document.getElementById("new-title").value = "";
-    document.getElementById("new-path").value = "";
-    document.getElementById("new-order").value = "";
-    loadMenus();
   });
 
-  body.addEventListener("click", async (e) => {
-    const id = e.target.dataset.id;
-    if (e.target.classList.contains("update")) {
-      const inputs = body.querySelectorAll(`[data-id='${id}']`);
-      const updated = {};
-      inputs.forEach(input => {
-        updated[input.dataset.field] = input.type === "number" ? parseInt(input.value) : input.value;
-      });
-      await supabase.from("admin_menus").update(updated).eq("id", id);
-      loadMenus();
-    } else if (e.target.classList.contains("delete")) {
-      if (confirm("このメニューを削除しますか？")) {
+  document.querySelectorAll(".delete-button").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const id = btn.dataset.id;
+      if (confirm("削除してよろしいですか？")) {
         await supabase.from("admin_menus").delete().eq("id", id);
-        loadMenus();
+        loadMenu();
       }
-    }
+    });
   });
+}
 
-  loadMenus();
+document.getElementById("add-button").addEventListener("click", async () => {
+  const title = document.getElementById("title-input").value;
+  const path = document.getElementById("path-input").value;
+  const icon = document.getElementById("icon-input").value;
+  if (!title || !path) return alert("タイトルとパスは必須です");
+  await supabase.from("admin_menus").insert({ title, path, icon });
+  document.getElementById("title-input").value = "";
+  document.getElementById("path-input").value = "";
+  document.getElementById("icon-input").value = "";
+  loadMenu();
+});
 </script>
