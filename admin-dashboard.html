@@ -17,12 +17,10 @@
   <main id="content-area">ここに管理ページが表示されます</main>
 
   <script type="module">
-    // ✅ 認証チェック
     if (localStorage.getItem("admin_auth") !== "true") {
       window.location.href = "admin-top.html";
     }
 
-    // ✅ Supabase読み込み
     import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
     const supabase = createClient(
       "https://odpjnxcyvcmivmccxtyo.supabase.co",
@@ -58,8 +56,23 @@
         const res = await fetch(path);
         const html = await res.text();
         contentArea.innerHTML = html;
+
+        // script[type=module] を再実行
+        const scripts = contentArea.querySelectorAll("script[type='module']");
+        scripts.forEach(oldScript => {
+          const newScript = document.createElement("script");
+          newScript.type = "module";
+          if (oldScript.src) {
+            newScript.src = oldScript.src;
+          } else {
+            newScript.textContent = oldScript.textContent;
+          }
+          document.body.appendChild(newScript);
+        });
+
       } catch (err) {
         contentArea.innerHTML = "ページ読み込み失敗";
+        console.error(err);
       }
     }
 
