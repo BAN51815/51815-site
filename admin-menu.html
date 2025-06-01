@@ -17,13 +17,13 @@
 <body>
   <h1>メニュー管理</h1>
   <div>
-    <input type="text" id="title" placeholder="タイトル" />
-    <input type="text" id="path" placeholder="パス（blogなど）" />
-    <input type="number" id="order" placeholder="順番" />
-    <button onclick="addMenu()">追加</button>
+    <input type="text" id="new-title" placeholder="タイトル" />
+    <input type="text" id="new-path" placeholder="パス（blogなど）" />
+    <input type="number" id="new-order" placeholder="順番" />
+    <button id="add-menu">追加</button>
   </div>
 
-  <table>
+  <table id="menu-table">
     <thead>
       <tr>
         <th>タイトル</th>
@@ -33,41 +33,56 @@
         <th>操作</th>
       </tr>
     </thead>
-    <tbody id="menu-table-body"></tbody>
+    <tbody></tbody>
   </table>
 
   <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-    const supabase = createClient(
-      'https://odpjnxcyvcmivmccxtyo.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kcGpueGN5dmNtaXZtY2N4dHlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2MjI0MjQsImV4cCI6MjA2NDE5ODQyNH0.uGSV1BPGvjcjGTtYOg0TwCarGTgdZeVWULSbdis_hsA'
-    );
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+    const supabase = createClient("https://odpjnxcyvcmivmccxtyo.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kcGpueGN5dmNtaXZtY2N4dHlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2MjI0MjQsImV4cCI6MjA2NDE5ODQyNH0.uGSV1BPGvjcjGTtYOg0TwCarGTgdZeVWULSbdis_hsA");
 
-    async function loadMenu() {
-      const { data, error } = await supabase.from('menus').select('*').order('order');
-      const tbody = document.getElementById('menu-table-body');
-      tbody.innerHTML = '';
+    async function loadMenus() {
+      const { data, error } = await supabase
+        .from("menus")
+        .select("*")
+        .order("order", { ascending: true });
+
+      if (error) {
+        console.error("メニューの取得に失敗:", error);
+        return;
+      }
+
+      const tbody = document.querySelector("#menu-table tbody");
+      tbody.innerHTML = "";
 
       data.forEach(item => {
-        const row = document.createElement('tr');
+        const row = document.createElement("tr");
+
         row.innerHTML = `
           <td>${item.title}</td>
           <td>${item.path}</td>
           <td>${item.order}</td>
-          <td><input type="checkbox" ${item.is_visible ? 'checked' : ''}></td>
-          <td><button>削除</button></td>
+          <td><input type="checkbox" class="visible-toggle"></td>
+          <td><button class="delete">削除</button></td>
         `;
 
-        const checkbox = row.querySelector('input[type="checkbox"]');
-        checkbox.addEventListener('change', async () => {
-          await supabase.from('menus').update({ is_visible: checkbox.checked }).eq('id', item.id);
+        const toggle = row.querySelector(".visible-toggle");
+        toggle.checked = item.is_visible;
+        toggle.addEventListener("change", async () => {
+          const { error } = await supabase
+            .from("menus")
+            .update({ is_visible: toggle.checked })
+            .eq("id", item.id);
+          if (error) {
+            alert("公開設定の更新に失敗しました");
+            toggle.checked = !toggle.checked;
+          }
         });
 
-        const deleteButton = row.querySelector('button');
-        deleteButton.addEventListener('click', async () => {
-          if (confirm('このメニューを削除しますか？')) {
-            await supabase.from('menus').delete().eq('id', item.id);
-            loadMenu();
+        row.querySelector(".delete").addEventListener("click", async () => {
+          if (!confirm("このメニューを削除しますか？")) return;
+          const { error } = await supabase.from("menus").delete().eq("id", item.id);
+          if (!error) {
+            row.remove();
           }
         });
 
@@ -75,19 +90,26 @@
       });
     }
 
-    window.addMenu = async () => {
-      const title = document.getElementById('title').value;
-      const path = document.getElementById('path').value;
-      const order = parseInt(document.getElementById('order').value);
-      if (!title || !path || isNaN(order)) return;
-      await supabase.from('menus').insert({ title, path, order, is_visible: true });
-      document.getElementById('title').value = "";
-      document.getElementById('path').value = "";
-      document.getElementById('order').value = "";
-      loadMenu();
-    };
+    document.querySelector("#add-menu").addEventListener("click", async () => {
+      const title = document.querySelector("#new-title").value;
+      const path = document.querySelector("#new-path").value;
+      const order = parseInt(document.querySelector("#new-order").value, 10);
 
-    loadMenu();
+      if (!title || !path || isNaN(order)) {
+        alert("すべての項目を入力してください");
+        return;
+      }
+
+      const { error } = await supabase.from("menus").insert([{ title, path, order, is_visible: true }]);
+      if (!error) {
+        loadMenus();
+        document.querySelector("#new-title").value = "";
+        document.querySelector("#new-path").value = "";
+        document.querySelector("#new-order").value = "";
+      }
+    });
+
+    loadMenus();
   </script>
 </body>
 </html>
