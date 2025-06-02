@@ -96,6 +96,17 @@
   }
 
   loadCategories();
+// タイトル入力時にslugを自動生成
+  document.getElementById("title").addEventListener("input", () => {
+    const title = document.getElementById("title").value;
+    const slug = title
+      .toLowerCase()
+      .replace(/[ぁ-んァ-ン一-龥]/g, "") // 日本語除去
+      .replace(/[^\w\s-]/g, "")
+      .trim()
+      .replace(/\s+/g, "-");
+    document.getElementById("slug").value = slug;
+  });
 
   document.getElementById("submit").addEventListener("click", async () => {
     const title = document.getElementById("title").value.trim();
