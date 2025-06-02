@@ -18,7 +18,10 @@
   <label for="thumbnail_url">サムネイル画像URL</label>
   <input type="text" id="thumbnail_url" placeholder="https://...jpg">
 
-  <label for="slug">カスタムスラッグ（任意）</label>
+  <label for="thumbnail_file">サムネイル画像アップロード</label>
+<input type="file" id="thumbnail_file" accept="image/*">
+
+<label for="slug">カスタムスラッグ（任意）</label>
   <input type="text" id="slug" placeholder="custom-url-slug">
 
   <div class="visibility-row">
@@ -66,7 +69,16 @@
       return setTimeout(waitForEditor, 100);
     }
     ClassicEditor
-      .create(document.querySelector("#editor"))
+      .create(document.querySelector("#editor"), {
+        toolbar: [
+          'heading', '|',
+          'bold', 'italic', 'underline', '|',
+          'fontColor', 'fontBackgroundColor', 'fontSize', 'fontFamily', '|',
+          'link', 'imageUpload', 'insertTable', 'mediaEmbed', 'blockQuote', '|',
+          'bulletedList', 'numberedList', 'alignment', 'horizontalLine', '|',
+          'undo', 'redo'
+        ]
+      })
       .then(ed => editor = ed)
       .catch(err => console.error(err));
   };
@@ -123,7 +135,20 @@
     let slug = document.getElementById('slug').value.trim();
     if (!slug) slug = title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '');
 
-    const thumbnail_url = document.getElementById("thumbnail_url").value.trim();
+    // サムネイルファイルアップロード処理
+    let thumbnail_url = document.getElementById("thumbnail_url").value.trim();
+    const fileInput = document.getElementById("thumbnail_file");
+    if (fileInput.files.length > 0) {
+      const file = fileInput.files[0];
+      const fileName = `thumbnails/${slug}-${Date.now()}-${file.name}`;
+      const { data, error: uploadError } = await supabase.storage.from("thumbnails").upload(fileName, file);
+      if (uploadError) {
+        alert("画像アップロードに失敗しました: " + uploadError.message);
+        return;
+      }
+      const { data: publicUrlData } = supabase.storage.from("thumbnails").getPublicUrl(fileName);
+      thumbnail_url = publicUrlData.publicUrl;
+    }
     const { error } = await supabase.from("blogs").insert([{
       title, category, tags, is_visible, body, slug, thumbnail_url
     }]);
