@@ -4,6 +4,8 @@
 
 <style>
   #blog-list {
+  max-width: 800px;
+  margin: 0 auto;
     display: flex;
     flex-direction: column;
     gap: 1rem;
@@ -94,13 +96,21 @@
       div.innerHTML = `
         ${imageHTML}
         <div class="blog-text">
-          <h3><a href="blog-detail.html?slug=${encodeURIComponent(post.slug)}">${post.title}</a></h3>
+          <h3 class="blog-title">${post.title}</h3>
           <p class="excerpt">${plainText}...</p>
           <p class="meta">${post.category || "未分類"}｜${new Date(post.created_at).toLocaleDateString()}</p>
         </div>
       `;
 
+      
+      div.querySelector(".blog-title").addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const slug = encodeURIComponent(post.slug);
+        window.dispatchEvent(new CustomEvent("load-blog-detail", { detail: slug }));
+      });
       container.appendChild(div);
+    
     });
   }
 
