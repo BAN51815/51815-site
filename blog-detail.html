@@ -1,6 +1,5 @@
 
 <div id="blog-detail"></div>
-
 <style>
   #blog-detail { margin: 2rem auto; max-width: 800px; background: #fff; padding: 1.5rem; border-radius: 6px; border: 1px solid #ccc; }
   #blog-detail h1 { margin-top: 0; font-size: 1.8rem; }
@@ -8,9 +7,7 @@
   #blog-detail img.thumb { width: 100px; height: auto; border-radius: 6px; margin-bottom: 1rem; }
   #blog-detail .body { font-size: 1rem; line-height: 1.7; }
 </style>
-
-<script type="module">
-  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+<script type="module">import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
   const supabase = createClient(
     "https://odpjnxcyvcmivmccxtyo.supabase.co",
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kcGpueGN5dmNtaXZtY2N4dHlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2MjI0MjQsImV4cCI6MjA2NDE5ODQyNH0.uGSV1BPGvjcjGTtYOg0TwCarGTgdZeVWULSbdis_hsA"
@@ -46,4 +43,32 @@
       <div class="body">${data.body || ""}</div>
     `;
   });
-</script>
+
+window.displayBlogDetail = async (slug) => {
+  const container = document.getElementById("blog-detail");
+  if (!slug) {
+    container.innerHTML = "<p>記事が見つかりません。</p>";
+    return;
+  }
+
+  const { data, error } = await supabase
+    .from("blogs")
+    .select("*")
+    .eq("slug", slug)
+    .eq("is_visible", true)
+    .limit(1)
+    .single();
+
+  if (error || !data) {
+    container.innerHTML = "<p>記事が存在しないか、公開されていません。</p>";
+    console.error(error);
+    return;
+  }
+
+  container.innerHTML = `
+    <h1>${data.title}</h1>
+    <p class="meta">${data.category || "未分類"}｜${new Date(data.created_at).toLocaleDateString()}</p>
+    ${data.thumbnail_url ? `<img class="thumb" src="${data.thumbnail_url}" alt="thumbnail">` : ""}
+    <div class="body">${data.body || ""}</div>
+  `;
+};</script>
