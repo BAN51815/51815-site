@@ -108,26 +108,7 @@ main {
   .hamburger {
     display: block;
   }
-}
-
-/* 追加：3カラム用レイアウト */
-main {
-  display: flex;
-  justify-content: center;
-  max-width: 1200px;
-  margin: 0 auto;
-  gap: 1rem;
-  padding: 1rem;
-}
-.left, .right {
-  width: 180px;
-  background: #f0f0f0;
-}
-.main {
-  flex: 0 0 800px;
-  background: #fff;
-}
-</style></head>
+}</style></head>
 <body>
 <header>
 <div class="header-top">
@@ -139,7 +120,9 @@ main {
 <div class="drawer" id="drawer-menu"></div>
 </nav>
 </header>
-<main><div class="left">左カラム（仮）</div><div class="main" id="content">ここにコンテンツが表示されます</div><div class="right">右カラム（仮）</div></main>
+<main>
+<div id="content">ここにコンテンツが表示されます</div>
+</main>
 <script type="module">
     import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
     const supabase = createClient(
