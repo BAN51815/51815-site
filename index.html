@@ -168,8 +168,47 @@ header {
 </nav>
 </header>
 <main><div class="left" id="left-column">読み込み中...</div><div class="main" id="content"></div><div class="right" id="right-column">読み込み中...</div></main>
-<script type="module">
-    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+<script type="module">async function loadPage(path) {
+  const res = await fetch(path);
+  const html = await res.text();
+  const container = document.getElementById("content");
+  container.innerHTML = html;
+
+  // 読み込まれた script を再実行
+  container.querySelectorAll("script").forEach(oldScript => {
+    const newScript = document.createElement("script");
+    if (oldScript.type) newScript.type = oldScript.type;
+    if (oldScript.src) {
+      newScript.src = oldScript.src;
+    } else {
+      newScript.textContent = oldScript.textContent;
+    }
+    oldScript.replaceWith(newScript);
+  });
+}
+
+async function loadSideColumns() {
+  try {
+    const [left, right] = await Promise.all([
+      fetch("left-column.html").then(res => res.text()),
+      fetch("right-column.html").then(res => res.text())
+    ]);
+    document.getElementById("left-column").innerHTML = left;
+    document.getElementById("right-column").innerHTML = right;
+  } catch (err) {
+    console.error("カラム読み込み失敗", err);
+  }
+}
+
+window.addEventListener("load-page", async (e) => {
+  const { path, slug } = e.detail;
+  await loadPage(path);
+  if (slug) {
+    window.dispatchEvent(new CustomEvent("load-blog-detail", { detail: slug }));
+  }
+});
+
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
     const supabase = createClient(
       "https://odpjnxcyvcmivmccxtyo.supabase.co",
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kcGpueGN5dmNtaXZtY2N4dHlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2MjI0MjQsImV4cCI6MjA2NDE5ODQyNH0.uGSV1BPGvjcjGTtYOg0TwCarGTgdZeVWULSbdis_hsA"
@@ -216,22 +255,79 @@ header {
     }
 
     async function loadPage(path) {
-  const res = await fetch(path);
-  const html = await res.text();
-  const container = document.getElementById("content");
-  container.innerHTML = html;
+      try {
+        const res = await fetch(path);
+        const html = await res.text();
+        content.innerHTML = html;
+        drawerMenu.classList.remove("open");
 
-  // 読み込まれた script を再実行
-  container.querySelectorAll("script").forEach(oldScript => {
-    const newScript = document.createElement("script");
-    if (oldScript.type) newScript.type = oldScript.type;
-    if (oldScript.src) {
-      newScript.src = oldScript.src;
-    } else {
-      newScript.textContent = oldScript.textContent;
+        // 再実行 <script type="module">
+        const moduleScripts = content.querySelectorAll("script[type='module']");
+        moduleScripts.forEach(old => {
+          const s = document.createElement("script");
+          s.type = "module";
+          s.textContent = old.textContent;
+          document.body.appendChild(s);
+        });
+
+        // 再実行 <script src="...">
+        const externalScripts = content.querySelectorAll("script[src]");
+        externalScripts.forEach(old => {
+          const s = document.createElement("script");
+          s.src = old.src;
+          document.body.appendChild(s);
+        });
+
+        // ブログ記事リンクも対応（再バインド）
+        content.querySelectorAll(".blog-card a[href^='blog-detail.html']").forEach(link => {
+          link.addEventListener("click", async e => {
+            e.preventDefault();
+            const url = new URL(link.href);
+            const slug = url.searchParams.get("slug");
+            if (slug) await loadPage(`blog-detail.html?slug=${encodeURIComponent(slug)}`);
+          });
+        });
+
+      } catch (err) {
+        content.innerHTML = `<p>ページ読み込み失敗</p>`;
+        console.error(err);
+      }
     }
-    oldScript.replaceWith(newScript);
-  });
+
+    toggle.addEventListener("click", (e) => {
+      drawerMenu.classList.toggle("open");
+      e.stopPropagation();
+    });
+
+    document.addEventListener("click", (e) => {
+      if (drawerMenu.classList.contains("open") &&
+          !drawerMenu.contains(e.target) &&
+          e.target !== toggle) {
+        drawerMenu.classList.remove("open");
+      }
+    });
+
+    loadMenu();
+// blog.html 側からのカスタムイベントを受け取る
+window.addEventListener("load-blog-detail", async (e) => {
+  const slug = e.detail;
+  await loadPage(`blog-detail.html?slug=${slug}`);
+});
+
+  
+
+// 左右カラム読み込み
+async function loadSideColumns() {
+  try {
+    const [left, right] = await Promise.all([
+      fetch("left-column.html").then(res => res.text()),
+      fetch("right-column.html").then(res => res.text())
+    ]);
+    document.getElementById("left-column").innerHTML = left;
+    document.getElementById("right-column").innerHTML = right;
+  } catch (err) {
+    console.error("カラム読み込み失敗", err);
+  }
 }
 loadSideColumns();
 
@@ -247,21 +343,6 @@ window.addEventListener("load-page", async (e) => {
   if (slug) {
     window.dispatchEvent(new CustomEvent("load-blog-detail", { detail: slug }));
   }
-});
-
-
-async function loadSideColumns() {
-  try {
-    const [left, right] = await Promise.all([
-      fetch("left-column.html").then(res => res.text()),
-      fetch("right-column.html").then(res => res.text())
-    ]);
-    document.getElementById("left-column").innerHTML = left;
-    document.getElementById("right-column").innerHTML = right;
-  } catch (err) {
-    console.error("カラム読み込み失敗", err);
-  }
-}
-loadSideColumns();</script>
+});</script>
 </body>
 </html>
