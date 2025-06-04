@@ -296,6 +296,15 @@ loadSideColumns();
 window.addEventListener("DOMContentLoaded", () => {
   loadPage("top.html");
 });
+
+
+window.addEventListener("load-page", async (e) => {
+  const { path, slug } = e.detail;
+  await loadPage(path);
+  if (slug) {
+    window.dispatchEvent(new CustomEvent("load-blog-detail", { detail: slug }));
+  }
+});
 </script>
 </body>
 </html>
