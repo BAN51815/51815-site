@@ -6,7 +6,6 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>51815</title>
-
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -108,7 +107,42 @@ main {
   .hamburger {
     display: block;
   }
-}</style></head>
+}
+
+/* 3カラムレイアウト（余白少なめ） */
+main {
+  display: flex;
+  justify-content: center;
+  max-width: 1100px;
+  margin: 0 auto;
+  gap: 0.5rem;
+  padding: 1rem;
+}
+.left, .right {
+  width: 160px;
+  background: #f0f0f0;
+}
+.main {
+  flex: 0 0 780px;
+  background: #fff;
+}
+
+/* スマホ用：縦並びにする */
+@media (max-width: 768px) {
+  main {
+    flex-direction: column;
+  }
+  .main {
+    width: 100%;
+    order: 1;
+  }
+  .left, .right {
+    width: 100%;
+    margin-top: 1rem;
+    order: 2;
+  }
+}
+</style></head>
 <body>
 <header>
 <div class="header-top">
@@ -120,9 +154,7 @@ main {
 <div class="drawer" id="drawer-menu"></div>
 </nav>
 </header>
-<main>
-<div id="content">ここにコンテンツが表示されます</div>
-</main>
+<main><div class="left" id="left-column">読み込み中...</div><div class="main" id="content">ここにコンテンツが表示されます</div><div class="right" id="right-column">読み込み中...</div></main>
 <script type="module">
     import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
     const supabase = createClient(
@@ -230,6 +262,22 @@ window.addEventListener("load-blog-detail", async (e) => {
   await loadPage(`blog-detail.html?slug=${slug}`);
 });
 
-  </script>
+  
+
+// 左右カラム読み込み
+async function loadSideColumns() {
+  try {
+    const [left, right] = await Promise.all([
+      fetch("left-column.html").then(res => res.text()),
+      fetch("right-column.html").then(res => res.text())
+    ]);
+    document.getElementById("left-column").innerHTML = left;
+    document.getElementById("right-column").innerHTML = right;
+  } catch (err) {
+    console.error("カラム読み込み失敗", err);
+  }
+}
+loadSideColumns();
+</script>
 </body>
 </html>
