@@ -1,41 +1,30 @@
 <div class="container">
-  <h2>ブログ投稿フォーム</h2>
-
-  <label for="title">タイトル</label>
-  <input type="text" id="title" placeholder="記事のタイトルを入力">
-
-  <label for="category">カテゴリ</label>
-  <select id="category">
-    <option value="">読み込み中...</option>
-  </select>
-
-  <label for="editor">本文</label>
-  <div id="editor">ここに本文を書いてください...</div>
-
-  <label for="tags">タグ（カンマ区切り）</label>
-  <input type="text" id="tags" placeholder="例: 副業,介護,起業">
-  
-  <label for="thumbnail_url">サムネイル画像URL</label>
-  <input type="text" id="thumbnail_url" placeholder="https://...jpg">
-
-  <label for="thumbnail_file">サムネイル画像アップロード</label>
-<input type="file" id="thumbnail_file" accept="image/*">
-
+<h2>ブログ投稿フォーム</h2>
+<label for="title">タイトル</label>
+<input id="title" placeholder="記事のタイトルを入力" type="text"/>
+<label for="category">カテゴリ</label>
+<select id="category">
+<option value="">読み込み中...</option>
+</select>
+<label for="editor">本文</label>
+<div id="editor">ここに本文を書いてください...</div>
+<label for="tags">タグ（カンマ区切り）</label>
+<input id="tags" placeholder="例: 副業,介護,起業" type="text"/>
+<label for="thumbnail_url">サムネイル画像URL</label>
+<input id="thumbnail_url" placeholder="https://...jpg" type="text"/>
+<label for="thumbnail_file">サムネイル画像アップロード</label>
+<input accept="image/*" id="thumbnail_file" type="file"/>
 <label for="slug">カスタムスラッグ（任意）</label>
-  <input type="text" id="slug" placeholder="custom-url-slug">
-
-  <div class="visibility-row">
-    <label for="is_visible">公開</label>
-    <input type="checkbox" id="is_visible" checked>
-  </div>
-
-  <div class="submit-area">
-    <button id="submit">投稿する</button>
-  </div>
+<input id="slug" placeholder="custom-url-slug" type="text"/>
+<div class="visibility-row">
+<label for="is_visible">公開</label>
+<input checked="" id="is_visible" type="checkbox"/>
 </div>
-
+<div class="submit-area">
+<button id="submit">投稿する</button>
+</div>
+</div>
 <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
-
 <style>
   * { box-sizing: border-box; }
   .container { padding: 1rem; background: #f8f8f8; }
@@ -50,7 +39,6 @@
   #editor { background: #fff; min-height: 300px; border: 1px solid #ccc; }
   .submit-area { margin-top: 1.5rem; }
 </style>
-
 <script type="module">
   if (localStorage.getItem("admin_auth") !== "true") {
     window.location.href = "admin-top.html";
