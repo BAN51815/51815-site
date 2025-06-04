@@ -248,6 +248,20 @@ window.addEventListener("load-page", async (e) => {
     window.dispatchEvent(new CustomEvent("load-blog-detail", { detail: slug }));
   }
 });
-</script>
+
+
+async function loadSideColumns() {
+  try {
+    const [left, right] = await Promise.all([
+      fetch("left-column.html").then(res => res.text()),
+      fetch("right-column.html").then(res => res.text())
+    ]);
+    document.getElementById("left-column").innerHTML = left;
+    document.getElementById("right-column").innerHTML = right;
+  } catch (err) {
+    console.error("カラム読み込み失敗", err);
+  }
+}
+loadSideColumns();</script>
 </body>
 </html>
