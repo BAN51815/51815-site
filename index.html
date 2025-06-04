@@ -11,28 +11,34 @@ html, body {
   margin: 0;
   padding: 0;
   width: 100%;
+  height: 100%;
 }
 
 * {
   box-sizing: border-box;
 }
 
-header, .menu-row, main {
+header, .menu-row {
   width: 100%;
 }
 
 main {
   display: flex;
-  min-height: 100vh;
+  width: 100%;
+  min-height: calc(100vh - 104px); /* header + menu-row の高さ調整用 */
 }
 
+/* 左右カラムは個別に背景色・余白指定 */
 .left {
   flex: 0 0 15%;
   background: #e6f6ff;
   padding: 1rem;
-  background: #e6f6ff;
+}
+
+.right {
+  flex: 0 0 15%;
+  background: #ffeaea;
   padding: 1rem;
-  background: #f0f0f0;
 }
 
 .main {
