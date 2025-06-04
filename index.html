@@ -168,8 +168,7 @@ header {
 </nav>
 </header>
 <main><div class="left" id="left-column">読み込み中...</div><div class="main" id="content"></div><div class="right" id="right-column">読み込み中...</div></main>
-<script type="module">
-    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+<script type="module">import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
     const supabase = createClient(
       "https://odpjnxcyvcmivmccxtyo.supabase.co",
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kcGpueGN5dmNtaXZtY2N4dHlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2MjI0MjQsImV4cCI6MjA2NDE5ODQyNH0.uGSV1BPGvjcjGTtYOg0TwCarGTgdZeVWULSbdis_hsA"
@@ -270,10 +269,7 @@ header {
 
     loadMenu();
 // blog.html 側からのカスタムイベントを受け取る
-window.addEventListener("load-blog-detail", async (e) => {
-  const slug = e.detail;
-  await loadPage(`blog-detail.html?slug=${slug}`);
-});
+
 
   
 
@@ -305,6 +301,17 @@ window.addEventListener("load-page", async (e) => {
     window.dispatchEvent(new CustomEvent("load-blog-detail", { detail: slug }));
   }
 });
-</script>
+
+window.addEventListener("load-blog-detail", (e) => {
+  const slug = e.detail;
+  const tryDispatch = () => {
+    if (typeof displayBlogDetail === "function") {
+      displayBlogDetail(slug);
+    } else {
+      setTimeout(tryDispatch, 100);
+    }
+  };
+  tryDispatch();
+});</script>
 </body>
 </html>
