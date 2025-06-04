@@ -142,6 +142,38 @@ main {
     order: 2;
   }
 }
+
+
+/* 幅比率をPC: 左10% 中央80% 右10%、スマホ時は全て100%縦並びに */
+main {
+  display: flex;
+  width: 100vw;
+}
+
+.left, .right {
+  width: 10%;
+  background: #f0f0f0;
+}
+
+.main {
+  width: 80%;
+  background: #fff;
+}
+
+@media (max-width: 768px) {
+  main {
+    flex-direction: column;
+    padding: 0.5rem;
+  }
+
+  .main, .left, .right {
+    width: 100%;
+  }
+
+  .left, .right {
+    margin-top: 1rem;
+  }
+}
 </style></head>
 <body>
 <header>
