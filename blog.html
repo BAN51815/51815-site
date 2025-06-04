@@ -1,235 +1,118 @@
 
-<!DOCTYPE html>
-
-<html lang="ja">
-<head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>51815</title>
+<h2>ブログ一覧</h2>
+<div id="blog-list"></div>
 
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-
-body {
-  font-family: sans-serif;
-  background: #f5f5f5;
-}
-
-header {
-  background: #222;
-  color: #fff;
-}
-
-.header-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1rem;
-}
-
-.logo {
-  font-size: 1.5rem;
-  font-weight: bold;
-}
-
-.hamburger {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  color: white;
-  display: none;
-}
-
-.menu-row {
-  background: #333;
-  padding: 0.5rem 1rem;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.75rem;
-}
-
-.menu-row button {
-  background: #fff;
-  border: 1px solid #ccc;
-  width: 120px;
-  padding: 0.5rem;
-  text-align: center;
-  border-radius: 6px;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.menu-row button:hover {
-  background: #eee;
-}
-
-main {
-  padding: 1rem;
-}
-
-/* ✅ 正しいスライド式ドロワーメニュー */
-.drawer {
-  position: fixed;
-  top: 0;
-  right: 0;
-  height: 100%;
-  width: 220px;
-  background: #333;
-  color: #fff;
-  padding: 1rem;
-  transform: translateX(100%);
-  transition: transform 0.3s ease;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  z-index: 1000;
-}
-
-.drawer.open {
-  transform: translateX(0);
-}
-
-.drawer button {
-  background: #fff;
-  border: 1px solid #ccc;
-  padding: 0.75rem;
-  text-align: center;
-  border-radius: 4px;
-  font-size: 1rem;
-  cursor: pointer;
-}
-
-@media (max-width: 768px) {
-  .menu-row {
-    display: none;
+  #blog-list {
+  max-width: 800px;
+  margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1rem;
   }
-  .hamburger {
-    display: block;
+
+  .blog-card {
+    display: flex;
+    gap: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #fff;
+    padding: 1rem;
+    align-items: flex-start;
   }
-}</style></head>
-<body>
-<header>
-<div class="header-top">
-<div class="logo">51815</div>
-<button class="hamburger" id="menu-toggle">☰</button>
-</div>
-<nav>
-<div class="menu-row" id="menu-container">読み込み中...</div>
-<div class="drawer" id="drawer-menu"></div>
-</nav>
-</header>
-<main>
-<div id="content">ここにコンテンツが表示されます</div>
-</main>
+
+  .blog-card:hover {
+    background: #f4f4f4;
+  }
+
+  .blog-card img.thumb {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    flex-shrink: 0;
+    border-radius: 4px;
+  }
+
+  .blog-text {
+    flex-grow: 1;
+  }
+
+  .blog-text h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #006;
+    text-decoration: underline;
+  }
+
+  .blog-text .excerpt {
+    margin: 0.5rem 0;
+    font-size: 0.95rem;
+  }
+
+  .blog-text .meta {
+    font-size: 0.8rem;
+    color: #888;
+  }
+</style>
+
 <script type="module">
-    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-    const supabase = createClient(
-      "https://odpjnxcyvcmivmccxtyo.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kcGpueGN5dmNtaXZtY2N4dHlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2MjI0MjQsImV4cCI6MjA2NDE5ODQyNH0.uGSV1BPGvjcjGTtYOg0TwCarGTgdZeVWULSbdis_hsA"
-    );
+  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+  const supabase = createClient(
+    "https://odpjnxcyvcmivmccxtyo.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kcGpueGN5dmNtaXZtY2N4dHlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2MjI0MjQsImV4cCI6MjA2NDE5ODQyNH0.uGSV1BPGvjcjGTtYOg0TwCarGTgdZeVWULSbdis_hsA"
+  );
 
-    const menuContainer = document.getElementById("menu-container");
-    const drawerMenu = document.getElementById("drawer-menu");
-    const content = document.getElementById("content");
-    const toggle = document.getElementById("menu-toggle");
+  const container = document.getElementById("blog-list");
 
-    const closeBtn = document.createElement("div");
-    closeBtn.textContent = "☰";
-    closeBtn.style.padding = "1rem";
-    closeBtn.style.cursor = "pointer";
-    closeBtn.style.fontSize = "1.5rem";
-    closeBtn.addEventListener("click", (e) => {
-      drawerMenu.classList.remove("open");
-      e.stopPropagation();
-    });
-    drawerMenu.appendChild(closeBtn);
+  async function loadPosts() {
+    const { data, error } = await supabase
+      .from("blogs")
+      .select("*")
+      .eq("is_visible", true)
+      .order("created_at", { ascending: false });
 
-    async function loadMenu() {
-      const { data, error } = await supabase.from("menus").select("*").eq("is_visible", true).order("order");
-      if (error) {
-        menuContainer.innerHTML = "メニュー読み込み失敗";
-        drawerMenu.innerHTML += "<p>メニュー読み込み失敗</p>";
-        console.error(error);
-        return;
-      }
+    if (error) {
+      container.innerHTML = "<p>記事の読み込みに失敗しました。</p>";
+      console.error(error);
+      return;
+    }
 
-      menuContainer.innerHTML = "";
-      drawerMenu.innerHTML = "";
-      drawerMenu.appendChild(closeBtn);
+    if (!data.length) {
+      container.innerHTML = "<p>公開中のブログ記事はありません。</p>";
+      return;
+    }
 
-      data.forEach((item) => {
-        const btn = document.createElement("button");
-        btn.textContent = item.title;
-        btn.onclick = () => loadPage(item.path);
-        const clone = btn.cloneNode(true);
-        clone.onclick = btn.onclick;
-        menuContainer.appendChild(btn);
-        drawerMenu.appendChild(clone);
+    data.forEach(post => {
+      const div = document.createElement("div");
+      div.className = "blog-card";
+
+      const imageHTML = post.thumbnail_url
+        ? `<img class="thumb" src="${post.thumbnail_url}" alt="thumbnail">`
+        : `<div class="thumb" style="width:100px;height:100px;background:#ddd;border-radius:4px;"></div>`;
+
+      const plainText = (post.body || "").replace(/<[^>]*>/g, "").slice(0, 100);
+
+      div.innerHTML = `
+        ${imageHTML}
+        <div class="blog-text">
+          <h3 class="blog-title">${post.title}</h3>
+          <p class="excerpt">${plainText}...</p>
+          <p class="meta">${post.category || "未分類"}｜${new Date(post.created_at).toLocaleDateString()}</p>
+        </div>
+      `;
+
+      
+      div.querySelector(".blog-title").addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const slug = encodeURIComponent(post.slug);
+        window.dispatchEvent(new CustomEvent("load-blog-detail", { detail: slug }));
       });
-    }
-
-    async function loadPage(path) {
-      try {
-        const res = await fetch(path);
-        const html = await res.text();
-        content.innerHTML = html;
-        drawerMenu.classList.remove("open");
-
-        // 再実行 <script type="module">
-        const moduleScripts = content.querySelectorAll("script[type='module']");
-        moduleScripts.forEach(old => {
-          const s = document.createElement("script");
-          s.type = "module";
-          s.textContent = old.textContent;
-          document.body.appendChild(s);
-        });
-
-        // 再実行 <script src="...">
-        const externalScripts = content.querySelectorAll("script[src]");
-        externalScripts.forEach(old => {
-          const s = document.createElement("script");
-          s.src = old.src;
-          document.body.appendChild(s);
-        });
-
-        // ブログ記事リンクも対応（再バインド）
-        content.querySelectorAll(".blog-card a[href^='blog-detail.html']").forEach(link => {
-          link.addEventListener("click", async e => {
-            e.preventDefault();
-            const url = new URL(link.href);
-            const slug = url.searchParams.get("slug");
-            if (slug) await loadPage(`blog-detail.html?slug=${encodeURIComponent(slug)}`);
-          });
-        });
-
-      } catch (err) {
-        content.innerHTML = `<p>ページ読み込み失敗</p>`;
-        console.error(err);
-      }
-    }
-
-    toggle.addEventListener("click", (e) => {
-      drawerMenu.classList.toggle("open");
-      e.stopPropagation();
+      container.appendChild(div);
+    
     });
+  }
 
-    document.addEventListener("click", (e) => {
-      if (drawerMenu.classList.contains("open") &&
-          !drawerMenu.contains(e.target) &&
-          e.target !== toggle) {
-        drawerMenu.classList.remove("open");
-      }
-    });
-
-    loadMenu();
-// blog.html 側からのカスタムイベントを受け取る
-window.addEventListener("load-blog-detail", async (e) => {
-  const slug = e.detail;
-  await loadPage(`blog-detail.html?slug=${slug}`);
-});
-
-  </script>
-</body>
-</html>
+  loadPosts();
+</script>
