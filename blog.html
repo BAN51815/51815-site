@@ -105,7 +105,9 @@
         e.preventDefault();
         e.stopPropagation();
         const slug = encodeURIComponent(post.slug);
-        window.dispatchEvent(new CustomEvent("load-blog-detail", { detail: slug }));
+        loadPage("blog-detail.html").then(() => {
+          window.dispatchEvent(new CustomEvent("load-blog-detail", { detail: slug }));
+        });
       });
       container.appendChild(div);
     
