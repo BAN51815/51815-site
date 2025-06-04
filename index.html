@@ -1,29 +1,146 @@
 
 <!DOCTYPE html>
+
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>51815</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>51815</title>
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: sans-serif;
+  background: #f5f5f5;
+}
+
+header {
+  background: #222;
+  color: #fff;
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.hamburger {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: white;
+  display: none;
+}
+
+.menu-row {
+  background: #333;
+  padding: 0.5rem 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.menu-row button {
+  background: #fff;
+  border: 1px solid #ccc;
+  width: 120px;
+  padding: 0.5rem;
+  text-align: center;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.menu-row button:hover {
+  background: #eee;
+}
+
+main {
+  padding: 1rem;
+}
+
+/* ✅ 正しいスライド式ドロワーメニュー */
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 220px;
+  background: #333;
+  color: #fff;
+  padding: 1rem;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 1000;
+}
+
+.drawer.open {
+  transform: translateX(0);
+}
+
+.drawer button {
+  background: #fff;
+  border: 1px solid #ccc;
+  padding: 0.75rem;
+  text-align: center;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .menu-row {
+    display: none;
+  }
+  .hamburger {
+    display: block;
+  }
+}
+
+/* 追加：3カラム用レイアウト */
+main {
+  display: flex;
+  justify-content: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 1rem;
+  padding: 1rem;
+}
+.left, .right {
+  width: 180px;
+  background: #f0f0f0;
+}
+.main {
+  flex: 0 0 800px;
+  background: #fff;
+}
+</style></head>
 <body>
-  <header>
-    <div class="header-top">
-      <div class="logo">51815</div>
-      <button class="hamburger" id="menu-toggle">☰</button>
-    </div>
-    <nav>
-      <div class="menu-row" id="menu-container">読み込み中...</div>
-      <div class="drawer" id="drawer-menu"></div>
-    </nav>
-  </header>
-
-  <main>
-    <div id="content">ここにコンテンツが表示されます</div>
-  </main>
-
-  <script type="module">
+<header>
+<div class="header-top">
+<div class="logo">51815</div>
+<button class="hamburger" id="menu-toggle">☰</button>
+</div>
+<nav>
+<div class="menu-row" id="menu-container">読み込み中...</div>
+<div class="drawer" id="drawer-menu"></div>
+</nav>
+</header>
+<main><div class="left">左カラム（仮）</div><div class="main" id="content">ここにコンテンツが表示されます</div><div class="right">右カラム（仮）</div></main>
+<script type="module">
     import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
     const supabase = createClient(
       "https://odpjnxcyvcmivmccxtyo.supabase.co",
