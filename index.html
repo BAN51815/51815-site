@@ -25,7 +25,7 @@ header, .menu-row {
 main {
   display: flex;
   width: 100%;
-  min-height: calc(100vh - 104px); /* header + menu-row の高さ調整用 */
+  min-height: 100dvh; /* header + menu-row の高さ調整用 */
 }
 
 /* 左右カラムは個別に背景色・余白指定 */
@@ -144,6 +144,15 @@ header {
   }
   .left, .right {
     margin-top: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .main {
+    order: 1;
+  }
+  .left, .right {
+    order: 2;
   }
 }
 </style></head>
