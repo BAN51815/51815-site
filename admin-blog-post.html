@@ -51,6 +51,7 @@
 </div>
 
 <script type="module">
+(async () => {
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 const supabase = createClient("https://odpjnxcyvcmivmccxtyo.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kcGpueGN5dmNtaXZtY2N4dHlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2MjI0MjQsImV4cCI6MjA2NDE5ODQyNH0.uGSV1BPGvjcjGTtYOg0TwCarGTgdZeVWULSbdis_hsA");
 
@@ -186,6 +187,8 @@ try {
   console.error("カテゴリ読み込みエラー:", e);
   categorySelect.innerHTML = "<option value=''>カテゴリ取得失敗</option>";
 }
+
+})();
 </script>
 
 </div>
