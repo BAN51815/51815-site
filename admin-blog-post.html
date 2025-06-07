@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>ブログ投稿フォーム</title>
-  <script src="https://cdn.jsdelivr.net/npm/@ckeditor/ckeditor5-build-full/build/ckeditor.js"></script>
+  <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
   <script src="https://unpkg.com/wanakana"></script>
   <style>
     * { box-sizing: border-box; }
@@ -60,19 +60,26 @@
   );
 
   let editor;
-  ClassicEditor
-    .create(document.querySelector("#editor"), {
-      toolbar: [
-        'heading', '|',
-        'bold', 'italic', 'underline', '|',
-        'fontColor', 'fontBackgroundColor', 'fontSize', 'fontFamily', '|',
-        'link', 'imageUpload', 'insertTable', 'mediaEmbed', 'blockQuote', '|',
-        'bulletedList', 'numberedList', 'alignment', 'horizontalLine', '|',
-        'undo', 'redo'
-      ]
-    })
-    .then(ed => editor = ed)
-    .catch(err => console.error("CKEditor error:", err));
+
+  const waitForEditor = () => {
+    if (typeof ClassicEditor === "undefined") {
+      return setTimeout(waitForEditor, 100);
+    }
+    ClassicEditor
+      .create(document.querySelector("#editor"), {
+        toolbar: [
+          'heading', '|',
+          'bold', 'italic', 'underline', '|',
+          'fontColor', 'fontBackgroundColor', 'fontSize', 'fontFamily', '|',
+          'link', 'imageUpload', 'insertTable', 'mediaEmbed', 'blockQuote', '|',
+          'bulletedList', 'numberedList', 'alignment', 'horizontalLine', '|',
+          'undo', 'redo'
+        ]
+      })
+      .then(ed => editor = ed)
+      .catch(err => console.error(err));
+  };
+  waitForEditor();
 
   const categorySelect = document.getElementById("category");
 
@@ -81,13 +88,12 @@
     const { data, error } = await supabase
       .from("blog_categories")
       .select("*")
+      .eq("is_visible", true)
       .order("sort_order", { ascending: true });
-
-    console.log("取得データ:", data);
 
     if (error || !data) {
       categorySelect.innerHTML = "<option value=''>カテゴリ取得失敗</option>";
-      alert("カテゴリが取得できませんでした");
+      console.error("カテゴリ取得失敗:", error);
       return;
     }
 
