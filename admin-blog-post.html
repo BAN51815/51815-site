@@ -7,41 +7,44 @@
   <script src="https://unpkg.com/wanakana"></script>
   <style>
     * { box-sizing: border-box; }
-    .container { padding: 1rem; background: #f8f8f8; }
-    h2 { margin-bottom: 1rem; }
-    input, select, textarea, button {
-      padding: 0.5rem; margin: 0.25rem 0; font-size: 1rem; width: 100%;
-    }
-    label { display: block; margin-top: 1rem; font-weight: bold; }
-    .visibility-row {
-      display: flex; align-items: center; gap: 0.5rem; margin-top: 1rem;
+    body { font-family: sans-serif; padding: 2rem; background: #f4f4f4; }
+    .container { max-width: 800px; margin: auto; background: #fff; padding: 2rem; border-radius: 8px; }
+    label { font-weight: bold; display: block; margin-top: 1rem; }
+    input, select, button, textarea {
+      font-size: 1rem; padding: 0.5rem; margin-top: 0.25rem; width: 100%;
     }
     #editor { background: #fff; min-height: 300px; border: 1px solid #ccc; }
-    .submit-area { margin-top: 1.5rem; }
+    .submit-area { margin-top: 2rem; text-align: right; }
   </style>
 </head>
 <body>
 <div class="container">
   <h2>ブログ投稿フォーム</h2>
+
   <label for="title">タイトル</label>
-  <input id="title" placeholder="記事のタイトルを入力" type="text"/>
+  <input id="title" placeholder="記事のタイトルを入力" type="text" />
+
   <label for="category">カテゴリ</label>
-  <select id="category"><option value="">カテゴリを選択</option><option value="__new__">＋新しいカテゴリを追加</option></select>
-<input type="text" id="new_category_input" placeholder="新しいカテゴリ名を入力" style="display:none;" />
+  <select id="category"></select>
+  <input type="text" id="new_category_input" placeholder="新しいカテゴリ名を入力" style="display:none;" />
+
   <label for="editor">本文</label>
   <div id="editor">ここに本文を書いてください...</div>
+
   <label for="tags">タグ（カンマ区切り）</label>
-  <input id="tags" placeholder="例: 副業,介護,起業" type="text"/>
+  <input id="tags" placeholder="例: 副業,介護,起業" type="text" />
+
   <label for="thumbnail_url">サムネイル画像URL</label>
-  <input id="thumbnail_url" placeholder="https://...jpg" type="text"/>
+  <input id="thumbnail_url" placeholder="https://...jpg" type="text" />
+
   <label for="thumbnail_file">サムネイル画像アップロード</label>
-  <input accept="image/*" id="thumbnail_file" type="file"/>
-  <label for="slug">カスタムスラッグ（任意）</label>
-  <input id="slug" placeholder="custom-url-slug" type="text"/>
-  <div class="visibility-row">
-    <label for="is_visible">公開</label>
-    <input checked id="is_visible" type="checkbox"/>
-  </div>
+  <input type="file" id="thumbnail_file" accept="image/*" />
+
+  <label for="slug">slug（自動生成・編集可）</label>
+  <input id="slug" placeholder="custom-url-slug" type="text" />
+
+  <label><input type="checkbox" id="is_visible" checked /> 公開</label>
+
   <div class="submit-area">
     <button id="submit">投稿する</button>
   </div>
@@ -53,105 +56,50 @@
   }
 
   import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-  const supabase = createClient(
-    "https://odpjnxcyvcmivmccxtyo.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kcGpueGN5dmNtaXZtY2N4dHlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2MjI0MjQsImV4cCI6MjA2NDE5ODQyNH0.uGSV1BPGvjcjGTtYOg0TwCarGTgdZeVWULSbdis_hsA"
-  );
+  if (!window.supabaseClient) {
+    window.supabaseClient = createClient(
+      "https://odpjnxcyvcmivmccxtyo.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kcGpueGN5dmNtaXZtY2N4dHlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2MjI0MjQsImV4cCI6MjA2NDE5ODQyNH0.uGSV1BPGvjcjGTtYOg0TwCarGTgdZeVWULSbdis_hsA"
+    );
+  }
+  const supabase = window.supabaseClient;
 
   let editor;
-
-  const waitForEditor = () => {
-    if (typeof ClassicEditor === "undefined") {
-      return setTimeout(waitForEditor, 100);
-    }
-    ClassicEditor
-      .create(document.querySelector("#editor"), {
-        toolbar: [
-          'heading', '|',
-          'bold', 'italic', 'underline', '|',
-          'fontColor', 'fontBackgroundColor', 'fontSize', 'fontFamily', '|',
-          'link', 'imageUpload', 'insertTable', 'mediaEmbed', 'blockQuote', '|',
-          'bulletedList', 'numberedList', 'alignment', 'horizontalLine', '|',
-          'undo', 'redo'
-        ]
-      })
-      .then(ed => editor = ed)
-      .catch(err => console.error(err));
-  };
-  waitForEditor();
+  ClassicEditor.create(document.querySelector("#editor")).then(ed => editor = ed);
 
   const categorySelect = document.getElementById("category");
-
-  async function loadCategories() {
-    categorySelect.innerHTML = "<option value=''>読み込み中...</option>";
-    const { data, error } = await supabase
-      .from("blog_categories")
-      .select("*")
-      .eq("is_visible", true)
-      .order("sort_order", { ascending: true });
-
-    categorySelect.innerHTML = ""; // 初期化
-
-    if (error || !data || data.length === 0) {
-      categorySelect.innerHTML = "<option value=''>カテゴリ取得失敗</option>";
-      console.error("カテゴリ取得エラー:", error || "データなし");
-      alert("カテゴリの読み込みに失敗しました。");
-      return;
-    }
-
-    data.forEach(cat => {
-      const opt = document.createElement("option");
-      opt.value = cat.name;
-      opt.textContent = cat.name;
-      categorySelect.appendChild(opt);
-    });
-  }
+  const newCatInput = document.getElementById("new_category_input");
 
   async function loadCategories() {
     categorySelect.innerHTML = "<option value=''>カテゴリを選択</option>";
-    const { data, error } = await supabase
-      .from("blog_categories")
-      .select("*")
-      .order("sort_order", { ascending: true });
-
-    categorySelect.innerHTML = "<option value=''>カテゴリを選択</option>";
-
-    if (error || !data || data.length === 0) {
-      categorySelect.innerHTML += "<option value=''>カテゴリ取得失敗</option>";
-      console.error("カテゴリ取得エラー:", error || "データなし");
-      return;
+    const { data, error } = await supabase.from("blog_categories").select("*").order("sort_order", { ascending: true });
+    if (!error && data && data.length > 0) {
+      data.forEach(cat => {
+        const opt = document.createElement("option");
+        opt.value = cat.name;
+        opt.textContent = cat.name;
+        categorySelect.appendChild(opt);
+      });
     }
-
-    data.forEach(cat => {
-      const opt = document.createElement("option");
-      opt.value = cat.name;
-      opt.textContent = cat.name;
-      categorySelect.appendChild(opt);
-    });
-
-    // 最後に新規追加用オプションを追加
-    const newOpt = document.createElement("option");
-    newOpt.value = "__new__";
-    newOpt.textContent = "＋新しいカテゴリを追加";
-    categorySelect.appendChild(newOpt);
+    const opt = document.createElement("option");
+    opt.value = "__new__";
+    opt.textContent = "＋新しいカテゴリを追加";
+    categorySelect.appendChild(opt);
   }
 
   loadCategories();
 
   categorySelect.addEventListener("change", () => {
-    const input = document.getElementById("new_category_input");
     if (categorySelect.value === "__new__") {
-      input.style.display = "block";
+      newCatInput.style.display = "block";
     } else {
-      input.style.display = "none";
+      newCatInput.style.display = "none";
     }
   });
 
-
   document.getElementById("title").addEventListener("input", () => {
     const title = document.getElementById("title").value;
-    const romaji = wanakana.toRomaji(title);
-    const slug = romaji
+    const slug = wanakana.toRomaji(title)
       .toLowerCase()
       .replace(/[^\w\s-]/g, "")
       .trim()
@@ -162,8 +110,20 @@
   document.getElementById("submit").addEventListener("click", async () => {
     const title = document.getElementById("title").value.trim();
     let category = categorySelect.value;
+    const tags = document.getElementById("tags").value.trim();
+    const slug = document.getElementById("slug").value.trim();
+    const is_visible = document.getElementById("is_visible").checked;
+    const body = editor.getData().trim();
+    let thumbnail_url = document.getElementById("thumbnail_url").value.trim();
+    const fileInput = document.getElementById("thumbnail_file");
+
+    if (!title || !body || !category) {
+      alert("タイトル・カテゴリ・本文は必須です");
+      return;
+    }
+
     if (category === "__new__") {
-      category = document.getElementById("new_category_input").value.trim();
+      category = newCatInput.value.trim();
       if (!category) {
         alert("新しいカテゴリ名を入力してください");
         return;
@@ -173,23 +133,7 @@
         await supabase.from("blog_categories").insert([{ name: category, is_visible: true, sort_order: 999 }]);
       }
     }
-    const tags = document.getElementById("tags").value.trim();
-    const is_visible = document.getElementById("is_visible").checked;
-    const body = editor.getData().trim();
 
-    if (!title || !body || !category) {
-      alert("タイトル・カテゴリ・本文は必須です");
-      return;
-    }
-
-    let slug = document.getElementById("slug").value.trim();
-    if (!slug) {
-      const romaji = wanakana.toRomaji(title);
-      slug = romaji.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '');
-    }
-
-    let thumbnail_url = document.getElementById("thumbnail_url").value.trim();
-    const fileInput = document.getElementById("thumbnail_file");
     if (fileInput.files.length > 0) {
       const file = fileInput.files[0];
       const fileName = `thumbnails/${slug}-${Date.now()}-${file.name}`;
@@ -203,7 +147,7 @@
     }
 
     const { error } = await supabase.from("blogs").insert([{
-      title, category, tags, is_visible, body, slug, thumbnail_url
+      title, category, tags, slug, body, is_visible, thumbnail_url
     }]);
 
     if (error) {
