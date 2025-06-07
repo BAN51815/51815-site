@@ -6,15 +6,16 @@
   <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
   <script src="https://unpkg.com/wanakana"></script>
   <style>
-    * { box-sizing: border-box; }
-    body { font-family: sans-serif; padding: 2rem; background: #f4f4f4; }
+    .container * { box-sizing: border-box; }
+    body { font-family: sans-serif; background: #f4f4f4; }
+.container { padding: 2rem; }
     .container { max-width: 800px; margin: auto; background: #fff; padding: 2rem; border-radius: 8px; }
     label { font-weight: bold; display: block; margin-top: 1rem; }
-    input, select, button, textarea {
+    .container input, .container select, .container button, .container textarea {
       font-size: 1rem; padding: 0.5rem; margin-top: 0.25rem; width: 100%;
     }
-    #editor { background: #fff; min-height: 300px; border: 1px solid #ccc; }
-    .submit-area { margin-top: 2rem; text-align: right; }
+    .container #editor { background: #fff; min-height: 300px; border: 1px solid #ccc; }
+    .container .submit-area { margin-top: 2rem; text-align: right; }
   </style>
 </head>
 <body>
@@ -65,16 +66,12 @@
   const supabase = window.supabaseClient;
 
   let editor;
-  ClassicEditor.create(document.querySelector("#editor"))
-    .then(ed => editor = ed)
-    .catch(err => console.error(err));
+  ClassicEditor.create(document.querySelector("#editor")).then(ed => editor = ed);
 
   const categorySelect = document.getElementById("category");
   const newCatInput = document.getElementById("new_category_input");
 
-  async async function loadCategories() {
-    const categorySelect = document.getElementById("category");
-    const newCatInput = document.getElementById("new_category_input");
+  async function loadCategories() {
     categorySelect.innerHTML = "<option value=''>カテゴリを選択</option>";
     const { data, error } = await supabase.from("blog_categories").select("*").order("sort_order", { ascending: true });
     if (!error && data && data.length > 0) {
@@ -135,8 +132,6 @@
       const { data: existing } = await supabase.from("blog_categories").select("*").eq("name", category);
       if (!existing || existing.length === 0) {
         await supabase.from("blog_categories").insert([{ name: category, is_visible: true, sort_order: 999 }]);
-      await loadCategories();
-      categorySelect.value = category;
       }
     }
 
