@@ -1,11 +1,12 @@
+<div class="page-container">
 <!DOCTYPE html>
 <html lang="ja">
-<head>
+
   <meta charset="UTF-8">
   <title>管理者ログイン - 51815</title>
   <link rel="stylesheet" href="style.css">
-</head>
-<body>
+
+
   <h1>51815 管理者ログイン</h1>
   <form id="login-form">
     <input type="email" id="email" placeholder="メールアドレス" required><br>
@@ -15,8 +16,6 @@
   <div id="message"></div>
 
   <script type="module">
-    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-    const supabase = createClient("https://odpjnxcyvcmivmccxtyo.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kcGpueGN5dmNtaXZtY2N4dHlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2MjI0MjQsImV4cCI6MjA2NDE5ODQyNH0.uGSV1BPGvjcjGTtYOg0TwCarGTgdZeVWULSbdis_hsA");
 
     const form = document.getElementById("login-form");
     const msg = document.getElementById("message");
@@ -40,5 +39,5 @@
       window.location.href = "admin-dashboard.html";
     });
   </script>
-</body>
-</html>
+
+</div>
