@@ -86,7 +86,6 @@ const supabase = createClient("https://odpjnxcyvcmivmccxtyo.supabase.co", "eyJhb
   async function loadCategories() {
     console.log("カテゴリ取得開始");
     const { data, error } = await supabase
-      .from("blog_categories")
       .select("*")
       .eq("is_visible", true)
       .order("sort_order", { ascending: true });
