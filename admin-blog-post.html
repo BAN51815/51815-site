@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <title>ブログ投稿フォーム</title>
   <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@ckeditor/ckeditor5-build-classic/build/ckeditor.js"></script>
   <script src="https://unpkg.com/wanakana"></script>
   <style>
     * { box-sizing: border-box; }
@@ -60,25 +61,19 @@
   );
 
   let editor;
-  const waitForEditor = () => {
-    if (typeof ClassicEditor === "undefined") {
-      return setTimeout(waitForEditor, 100);
-    }
-    ClassicEditor
-      .create(document.querySelector("#editor"), {
-        toolbar: [
-          'heading', '|',
-          'bold', 'italic', 'underline', '|',
-          'fontColor', 'fontBackgroundColor', 'fontSize', 'fontFamily', '|',
-          'link', 'imageUpload', 'insertTable', 'mediaEmbed', 'blockQuote', '|',
-          'bulletedList', 'numberedList', 'alignment', 'horizontalLine', '|',
-          'undo', 'redo'
-        ]
-      })
-      .then(ed => editor = ed)
-      .catch(err => console.error(err));
-  };
-  waitForEditor();
+  ClassicEditor
+    .create(document.querySelector("#editor"), {
+      toolbar: [
+        'heading', '|',
+        'bold', 'italic', 'underline', '|',
+        'fontColor', 'fontBackgroundColor', 'fontSize', 'fontFamily', '|',
+        'link', 'imageUpload', 'insertTable', 'mediaEmbed', 'blockQuote', '|',
+        'bulletedList', 'numberedList', 'alignment', 'horizontalLine', '|',
+        'undo', 'redo'
+      ]
+    })
+    .then(ed => editor = ed)
+    .catch(err => console.error(err));
 
   const categorySelect = document.getElementById("category");
 
@@ -86,7 +81,6 @@
     const { data, error } = await supabase
       .from("blog_categories")
       .select("*")
-      .eq("is_visible", true)
       .order("sort_order", { ascending: true });
 
     if (error) {
@@ -104,7 +98,6 @@
   }
   loadCategories();
 
-  // slug自動生成（日本語→ローマ字変換）
   document.getElementById("title").addEventListener("input", () => {
     const title = document.getElementById("title").value;
     const romaji = wanakana.toRomaji(title);
