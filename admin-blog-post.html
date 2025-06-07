@@ -1,6 +1,6 @@
 <div class="page-container">
 <!DOCTYPE html>
-<html lang="ja">
+
 
   <meta charset="UTF-8" />
   <title>ブログ投稿フォーム</title>
@@ -81,7 +81,7 @@ const supabase = createClient("https://odpjnxcyvcmivmccxtyo.supabase.co", "eyJhb
   };
   waitForEditor();
 
-  const categorySelect = document.getElementById("category");
+  let categorySelect = document.getElementById("category");
 
   async function loadCategories() {
     console.log("カテゴリ取得開始");
@@ -163,7 +163,7 @@ const supabase = createClient("https://odpjnxcyvcmivmccxtyo.supabase.co", "eyJhb
   });
 
 
-const categorySelect = document.getElementById("category");
+let categorySelect = document.getElementById("category");
 
 try {
   const { data, error } = await supabase
