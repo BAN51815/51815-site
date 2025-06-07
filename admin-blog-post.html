@@ -26,7 +26,8 @@
   <label for="title">タイトル</label>
   <input id="title" placeholder="記事のタイトルを入力" type="text"/>
   <label for="category">カテゴリ</label>
-  <select id="category"></select>
+  <select id="category"><option value="">カテゴリを選択</option><option value="__new__">＋新しいカテゴリを追加</option></select>
+<input type="text" id="new_category_input" placeholder="新しいカテゴリ名を入力" style="display:none;" />
   <label for="editor">本文</label>
   <div id="editor">ここに本文を書いてください...</div>
   <label for="tags">タグ（カンマ区切り）</label>
@@ -52,11 +53,10 @@
   }
 
   import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-  if (!window.supabaseClient) window.supabaseClient = createClient(
+  const supabase = createClient(
     "https://odpjnxcyvcmivmccxtyo.supabase.co",
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kcGpueGN5dmNtaXZtY2N4dHlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2MjI0MjQsImV4cCI6MjA2NDE5ODQyNH0.uGSV1BPGvjcjGTtYOg0TwCarGTgdZeVWULSbdis_hsA"
   );
-  const supabase = window.supabaseClient;
 
   let editor;
 
@@ -68,9 +68,10 @@
       .create(document.querySelector("#editor"), {
         toolbar: [
           'heading', '|',
-          'bold', 'italic', '|',
+          'bold', 'italic', 'underline', '|',
+          'fontColor', 'fontBackgroundColor', 'fontSize', 'fontFamily', '|',
           'link', 'imageUpload', 'insertTable', 'mediaEmbed', 'blockQuote', '|',
-          'bulletedList', 'numberedList', '|',
+          'bulletedList', 'numberedList', 'alignment', 'horizontalLine', '|',
           'undo', 'redo'
         ]
       })
@@ -106,7 +107,46 @@
     });
   }
 
+  async function loadCategories() {
+    categorySelect.innerHTML = "<option value=''>カテゴリを選択</option>";
+    const { data, error } = await supabase
+      .from("blog_categories")
+      .select("*")
+      .order("sort_order", { ascending: true });
+
+    categorySelect.innerHTML = "<option value=''>カテゴリを選択</option>";
+
+    if (error || !data || data.length === 0) {
+      categorySelect.innerHTML += "<option value=''>カテゴリ取得失敗</option>";
+      console.error("カテゴリ取得エラー:", error || "データなし");
+      return;
+    }
+
+    data.forEach(cat => {
+      const opt = document.createElement("option");
+      opt.value = cat.name;
+      opt.textContent = cat.name;
+      categorySelect.appendChild(opt);
+    });
+
+    // 最後に新規追加用オプションを追加
+    const newOpt = document.createElement("option");
+    newOpt.value = "__new__";
+    newOpt.textContent = "＋新しいカテゴリを追加";
+    categorySelect.appendChild(newOpt);
+  }
+
   loadCategories();
+
+  categorySelect.addEventListener("change", () => {
+    const input = document.getElementById("new_category_input");
+    if (categorySelect.value === "__new__") {
+      input.style.display = "block";
+    } else {
+      input.style.display = "none";
+    }
+  });
+
 
   document.getElementById("title").addEventListener("input", () => {
     const title = document.getElementById("title").value;
@@ -121,7 +161,18 @@
 
   document.getElementById("submit").addEventListener("click", async () => {
     const title = document.getElementById("title").value.trim();
-    const category = categorySelect.value;
+    let category = categorySelect.value;
+    if (category === "__new__") {
+      category = document.getElementById("new_category_input").value.trim();
+      if (!category) {
+        alert("新しいカテゴリ名を入力してください");
+        return;
+      }
+      const { data: existing } = await supabase.from("blog_categories").select("*").eq("name", category);
+      if (!existing || existing.length === 0) {
+        await supabase.from("blog_categories").insert([{ name: category, is_visible: true, sort_order: 999 }]);
+      }
+    }
     const tags = document.getElementById("tags").value.trim();
     const is_visible = document.getElementById("is_visible").checked;
     const body = editor.getData().trim();
