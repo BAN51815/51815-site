@@ -1,87 +1,194 @@
+<div class="page-container">
 <!DOCTYPE html>
-<!-- 管理ダッシュボード（完全版） -->
-<head>
-  <meta charset="UTF-8">
-  <title>管理ダッシュボード - 51815</title>
-  <link rel="stylesheet" href="style.css">
-  <style>
-    body { display: flex; font-family: sans-serif; height: 100vh; margin: 0; }
-    nav { width: 220px; background: #222; color: #fff; padding: 1rem; }
-    nav button { display: block; width: 100%; margin: 0.5rem 0; padding: 0.5rem; font-size: 1rem; background: #444; color: #fff; border: none; cursor: pointer; }
-    nav button:hover { background: #666; }
-    main { flex: 1; padding: 1rem; overflow: auto; background: #f0f0f0; }
-  </style>
-</head>
-<body>
-  <nav id="menu-area">読み込み中...</nav>
-  <main id="content-area">ここに管理ページが表示されます</main>
 
-  <script type="module">
-    if (localStorage.getItem("admin_auth") !== "true") {
-      window.location.href = "admin-top.html";
+
+  <meta charset="UTF-8" />
+  <title>ブログ投稿フォーム</title>
+  <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+  <script src="https://unpkg.com/wanakana"></script>
+  <style>
+.page-container * { box-sizing: border-box; }
+    * { box-sizing: border-box; }
+    .page-container .container { padding: 1rem; background: #f8f8f8; }
+    h2 { margin-bottom: 1rem; }
+    input, select, textarea, button {
+      padding: 0.5rem; margin: 0.25rem 0; font-size: 1rem; width: 100%;
+    }
+    label { display: block; margin-top: 1rem; font-weight: bold; }
+    .visibility-row {
+      display: flex; align-items: center; gap: 0.5rem; margin-top: 1rem;
+    }
+    #editor { background: #fff; min-height: 300px; border: 1px solid #ccc; }
+    .submit-area { margin-top: 1.5rem; }
+  </style>
+
+
+<div class="container">
+  <h2>ブログ投稿フォーム</h2>
+  <label for="title">タイトル</label>
+  <input id="title" placeholder="記事のタイトルを入力" type="text"/>
+  <label for="category">カテゴリ</label>
+  <select id="category">
+    <option value="">読み込み中...</option>
+  </select>
+  <label for="editor">本文</label>
+  <div id="editor">ここに本文を書いてください...</div>
+  <label for="tags">タグ（カンマ区切り）</label>
+  <input id="tags" placeholder="例: 副業,介護,起業" type="text"/>
+  <label for="thumbnail_url">サムネイル画像URL</label>
+  <input id="thumbnail_url" placeholder="https://...jpg" type="text"/>
+  <label for="thumbnail_file">サムネイル画像アップロード</label>
+  <input accept="image/*" id="thumbnail_file" type="file"/>
+  <label for="slug">カスタムスラッグ（任意）</label>
+  <input id="slug" placeholder="custom-url-slug" type="text"/>
+  <div class="visibility-row">
+    <label for="is_visible">公開</label>
+    <input checked id="is_visible" type="checkbox"/>
+  </div>
+  <div class="submit-area">
+    <button id="submit">投稿する</button>
+  </div>
+</div>
+
+<script type="module">
+(async () => {
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+const supabase = createClient("https://odpjnxcyvcmivmccxtyo.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kcGpueGN5dmNtaXZtY2N4dHlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2MjI0MjQsImV4cCI6MjA2NDE5ODQyNH0.uGSV1BPGvjcjGTtYOg0TwCarGTgdZeVWULSbdis_hsA");
+
+  if (localStorage.getItem("admin_auth") !== "true") {
+    window.location.href = "admin-top.html";
+  }
+
+
+  let editor;
+
+  const waitForEditor = () => {
+    if (typeof ClassicEditor === "undefined") {
+      return setTimeout(waitForEditor, 100);
+    }
+    ClassicEditor
+      .create(document.querySelector("#editor"), {
+        toolbar: [
+          'heading', '|',
+          'bold', 'italic', 'underline', '|',
+          'fontColor', 'fontBackgroundColor', 'fontSize', 'fontFamily', '|',
+          'link', 'imageUpload', 'insertTable', 'mediaEmbed', 'blockQuote', '|',
+          'bulletedList', 'numberedList', 'alignment', 'horizontalLine', '|',
+          'undo', 'redo'
+        ]
+      })
+      .then(ed => editor = ed)
+      .catch(err => console.error(err));
+  };
+  waitForEditor();
+
+  let categorySelect = document.getElementById("category");
+
+  async function loadCategories() {
+    console.log("カテゴリ取得開始");
+    const { data, error } = await supabase
+      .select("*")
+      .eq("is_visible", true)
+      .order("sort_order", { ascending: true });
+
+    if (error || !data) {
+      categorySelect.innerHTML = "<option value=''>カテゴリ取得失敗</option>";
+      console.error("カテゴリ取得失敗:", error);
+      return;
     }
 
-    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-    const supabase = createClient(
-      "https://odpjnxcyvcmivmccxtyo.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kcGpueGN5dmNtaXZtY2N4dHlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2MjI0MjQsImV4cCI6MjA2NDE5ODQyNH0.uGSV1BPGvjcjGTtYOg0TwCarGTgdZeVWULSbdis_hsA"
-    );
+    categorySelect.innerHTML = "";
+    data.forEach(cat => {
+      const opt = document.createElement("option");
+      opt.value = cat.name;
+      opt.textContent = cat.name;
+      categorySelect.appendChild(opt);
+    });
+  }
 
-    const menuArea = document.getElementById("menu-area");
-    const contentArea = document.getElementById("content-area");
+  loadCategories();
 
-    async function loadAdminMenu() {
-      const { data, error } = await supabase
-        .from("admin_menus")
-        .select("*")
-        .order("order");
+  document.getElementById("title").addEventListener("input", () => {
+    const title = document.getElementById("title").value;
+    const romaji = wanakana.toRomaji(title);
+    const slug = romaji
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, "")
+      .trim()
+      .replace(/\s+/g, "-");
+    document.getElementById("slug").value = slug;
+  });
 
-      if (error) {
-        menuArea.innerHTML = "メニュー読み込み失敗";
-        console.error(error);
+  document.getElementById("submit").addEventListener("click", async () => {
+    const title = document.getElementById("title").value.trim();
+    const category = categorySelect.value;
+    const tags = document.getElementById("tags").value.trim();
+    const is_visible = document.getElementById("is_visible").checked;
+    const body = editor.getData().trim();
+
+    if (!title || !body || !category) {
+      alert("タイトル・カテゴリ・本文は必須です");
+      return;
+    }
+
+    let slug = document.getElementById("slug").value.trim();
+    if (!slug) {
+      const romaji = wanakana.toRomaji(title);
+      slug = romaji.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '');
+    }
+
+    let thumbnail_url = document.getElementById("thumbnail_url").value.trim();
+    const fileInput = document.getElementById("thumbnail_file");
+    if (fileInput.files.length > 0) {
+      const file = fileInput.files[0];
+      const fileName = `thumbnails/${slug}-${Date.now()}-${file.name}`;
+      const { data, error: uploadError } = await supabase.storage.from("thumbnails").upload(fileName, file);
+      if (uploadError) {
+        alert("画像アップロードに失敗しました: " + uploadError.message);
         return;
       }
-
-      menuArea.innerHTML = "";
-      data.forEach(item => {
-        const btn = document.createElement("button");
-        btn.textContent = item.title;
-        btn.addEventListener("click", () => loadPage(item.path));
-        menuArea.appendChild(btn);
-      });
+      const { data: publicUrlData } = supabase.storage.from("thumbnails").getPublicUrl(fileName);
+      thumbnail_url = publicUrlData.publicUrl;
     }
 
-    async function loadPage(path) {
-      try {
-        const res = await fetch(path);
-        const html = await res.text();
-        contentArea.innerHTML = html;
+    const { error } = await supabase.from("blogs").insert([{
+      title, category, tags, is_visible, body, slug, thumbnail_url
+    }]);
 
-        // 再実行が必要な <script type="module">
-        const moduleScripts = contentArea.querySelectorAll("script[type='module']");
-        moduleScripts.forEach(old => {
-          const newScript = document.createElement("script");
-      newScript.setAttribute("type", "module");
-          newScript.type = "module";
-          newScript.textContent = old.textContent;
-          document.body.appendChild(newScript);
-        });
-
-        // CDNなど <script src="..."> も再実行
-        const externalScripts = contentArea.querySelectorAll("script[src]");
-        externalScripts.forEach(old => {
-          const newScript = document.createElement("script");
-      newScript.setAttribute("type", "module");
-          newScript.src = old.src;
-          document.body.appendChild(newScript);
-        });
-
-      } catch (err) {
-        contentArea.innerHTML = "ページ読み込み失敗";
-        console.error(err);
-      }
+    if (error) {
+      alert("投稿に失敗しました: " + error.message);
+    } else {
+      alert("投稿が完了しました");
+      location.reload();
     }
+  });
 
-    loadAdminMenu();
-  </script>
-</body>
+
+let categorySelect = document.getElementById("category");
+
+try {
+  const { data, error } = await supabase
+    .from("blogs")
+    .select("category");
+
+  if (error || !data) {
+    categorySelect.innerHTML = "<option value=''>カテゴリ取得失敗</option>";
+  } else {
+    const uniqueCategories = [...new Set(data.map(row => row.category).filter(Boolean))];
+    categorySelect.innerHTML = "";
+    uniqueCategories.forEach(cat => {
+      const opt = document.createElement("option");
+      opt.value = cat;
+      opt.textContent = cat;
+      categorySelect.appendChild(opt);
+    });
+  }
+} catch (e) {
+  console.error("カテゴリ読み込みエラー:", e);
+  categorySelect.innerHTML = "<option value=''>カテゴリ取得失敗</option>";
+}
+
+})();
+</script>
+
+</div>
