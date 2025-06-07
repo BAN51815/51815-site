@@ -1,3 +1,4 @@
+<div class="page-container">
 <style>
 .page-container * { box-sizing: border-box; }
   * { box-sizing: border-box; }
@@ -31,11 +32,6 @@
     window.location.href = "admin-top.html";
   }
 
-  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-  const supabase = createClient(
-    "https://odpjnxcyvcmivmccxtyo.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kcGpueGN5dmNtaXZtY2N4dHlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2MjI0MjQsImV4cCI6MjA2NDE5ODQyNH0.uGSV1BPGvjcjGTtYOg0TwCarGTgdZeVWULSbdis_hsA"
-  );
 
   const title = document.getElementById("title");
   const path = document.getElementById("path");
@@ -100,3 +96,4 @@
 
   loadMenus();
 </script>
+</div>
