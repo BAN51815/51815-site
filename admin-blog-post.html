@@ -161,6 +161,31 @@ const supabase = createClient("https://odpjnxcyvcmivmccxtyo.supabase.co", "eyJhb
       location.reload();
     }
   });
+
+
+const categorySelect = document.getElementById("category");
+
+try {
+  const { data, error } = await supabase
+    .from("blogs")
+    .select("category");
+
+  if (error || !data) {
+    categorySelect.innerHTML = "<option value=''>カテゴリ取得失敗</option>";
+  } else {
+    const uniqueCategories = [...new Set(data.map(row => row.category).filter(Boolean))];
+    categorySelect.innerHTML = "";
+    uniqueCategories.forEach(cat => {
+      const opt = document.createElement("option");
+      opt.value = cat;
+      opt.textContent = cat;
+      categorySelect.appendChild(opt);
+    });
+  }
+} catch (e) {
+  console.error("カテゴリ読み込みエラー:", e);
+  categorySelect.innerHTML = "<option value=''>カテゴリ取得失敗</option>";
+}
 </script>
 
 </div>
