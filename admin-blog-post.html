@@ -84,12 +84,13 @@
 
   async function loadCategories(selectedValue = "") {
     categorySelect.innerHTML = "<option value=''>カテゴリを選択</option>";
-    const { data, error } = await supabase.from("blog_categories").select("*").order("sort_order", { ascending: true });
+    const { data, error } = await supabase.from("blogs").select("category");
     if (!error && data) {
-      data.forEach(cat => {
+      const categories = [...new Set(data.map(row => row.category).filter(Boolean))];
+      categories.forEach(name => {
         const opt = document.createElement("option");
-        opt.value = cat.name;
-        opt.textContent = cat.name;
+        opt.value = name;
+        opt.textContent = name;
         categorySelect.appendChild(opt);
       });
     }
@@ -126,22 +127,18 @@
     let thumbnail_url = document.getElementById("thumbnail_url").value.trim();
     const fileInput = document.getElementById("thumbnail_file");
 
-    if (!title || !body || !category) {
-      alert("タイトル・カテゴリ・本文は必須です");
-      return;
-    }
-
     if (category === "__new__") {
       category = newCatInput.value.trim();
       if (!category) {
         alert("新しいカテゴリ名を入力してください");
         return;
       }
-      const { data: existing } = await supabase.from("blog_categories").select("*").eq("name", category);
-      if (!existing || existing.length === 0) {
-        await supabase.from("blog_categories").insert([{ name: category, is_visible: true, sort_order: 999 }]);
-      }
       await loadCategories(category);
+    }
+
+    if (!title || !body || !category) {
+      alert("タイトル・カテゴリ・本文は必須です");
+      return;
     }
 
     if (fileInput.files.length > 0) {
