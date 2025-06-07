@@ -1,85 +1,64 @@
 <!DOCTYPE html>
-<!-- 管理ダッシュボード（完全版） -->
+<html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>管理ダッシュボード - 51815</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <title>管理ダッシュボード</title>
   <style>
-    body { display: flex; font-family: sans-serif; height: 100vh; margin: 0; }
-    nav { width: 220px; background: #222; color: #fff; padding: 1rem; }
-    nav button { display: block; width: 100%; margin: 0.5rem 0; padding: 0.5rem; font-size: 1rem; background: #444; color: #fff; border: none; cursor: pointer; }
-    nav button:hover { background: #666; }
-    main { flex: 1; padding: 1rem; overflow: auto; background: #f0f0f0; }
+    body {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      margin: 0;
+      height: 100vh;
+      font-family: sans-serif;
+    }
+    #menu-area {
+      background: #333;
+      color: #fff;
+      padding: 1rem;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    #content-area {
+      padding: 1rem;
+      overflow-y: auto;
+    }
+    a {
+      color: white;
+      display: block;
+      padding: 0.5rem 0;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
-  <nav id="menu-area">読み込み中...</nav>
-  <main id="content-area">ここに管理ページが表示されます</main>
+  <nav id="menu-area">
+    <h2>メニュー</h2>
+    <a href="#" data-page="admin-menu.html">サイトメニュー管理</a>
+    <a href="#" data-page="admin-addmenu.html">メニュー追加</a>
+    <a href="#" data-page="admin-account.html">アカウント管理</a>
+    <a href="#" data-page="admin-apps.html">アプリ管理</a>
+  </nav>
+  <main id="content-area">
+    <p>管理ページを選択してください。</p>
+  </main>
+  <script>
+    const links = document.querySelectorAll('#menu-area a');
+    const contentArea = document.getElementById('content-area');
 
-  <script type="module">
-    if (localStorage.getItem("admin_auth") !== "true") {
-      window.location.href = "admin-top.html";
-    }
+    links.forEach(link => {
+      link.addEventListener('click', async e => {
+        e.preventDefault();
+        const page = link.getAttribute('data-page');
+        if (!page) return;
 
-    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-    const supabase = createClient(
-      "https://odpjnxcyvcmivmccxtyo.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kcGpueGN5dmNtaXZtY2N4dHlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2MjI0MjQsImV4cCI6MjA2NDE5ODQyNH0.uGSV1BPGvjcjGTtYOg0TwCarGTgdZeVWULSbdis_hsA"
-    );
-
-    const menuArea = document.getElementById("menu-area");
-    const contentArea = document.getElementById("content-area");
-
-    async function loadAdminMenu() {
-      const { data, error } = await supabase
-        .from("admin_menus")
-        .select("*")
-        .order("order");
-
-      if (error) {
-        menuArea.innerHTML = "メニュー読み込み失敗";
-        console.error(error);
-        return;
-      }
-
-      menuArea.innerHTML = "";
-      data.forEach(item => {
-        const btn = document.createElement("button");
-        btn.textContent = item.title;
-        btn.addEventListener("click", () => loadPage(item.path));
-        menuArea.appendChild(btn);
-      });
-    }
-
-    async function loadPage(path) {
-      try {
-        const res = await fetch(path);
+        const res = await fetch(page);
         const html = await res.text();
         contentArea.innerHTML = html;
-
-        // 再実行が必要な <script type="module">
-        const moduleScripts = contentArea.querySelectorAll("script[type='module']");
-        moduleScripts.forEach(old => {
-          const newScript = document.createElement("script");
-          newScript.type = "module";
-          newScript.textContent = old.textContent;
-          document.body.appendChild(newScript);
-        });
-
-        // CDNなど <script src="..."> も再実行
-        const externalScripts = contentArea.querySelectorAll("script[src]");
-        externalScripts.forEach(old => {
-          const newScript = document.createElement("script");
-          newScript.src = old.src;
-          document.body.appendChild(newScript);
-        });
-
-      } catch (err) {
-        contentArea.innerHTML = "ページ読み込み失敗";
-        console.error(err);
-      }
-    }
-
-    loadAdminMenu();
+      });
+    });
   </script>
 </body>
+</html>
