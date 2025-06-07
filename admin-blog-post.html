@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <title>ブログ投稿フォーム</title>
-  <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@ckeditor/ckeditor5-build-classic/build/ckeditor.js"></script>
   <script src="https://unpkg.com/wanakana"></script>
   <style>
@@ -73,7 +72,7 @@
       ]
     })
     .then(ed => editor = ed)
-    .catch(err => console.error(err));
+    .catch(err => console.error("CKEditor error:", err));
 
   const categorySelect = document.getElementById("category");
 
@@ -83,8 +82,11 @@
       .select("*")
       .order("sort_order", { ascending: true });
 
-    if (error) {
+    console.log("カテゴリデータ:", data);
+
+    if (error || !data) {
       categorySelect.innerHTML = "<option value=''>カテゴリ取得失敗</option>";
+      alert("カテゴリが取得できませんでした");
       return;
     }
 
@@ -96,6 +98,7 @@
       categorySelect.appendChild(opt);
     });
   }
+
   loadCategories();
 
   document.getElementById("title").addEventListener("input", () => {
