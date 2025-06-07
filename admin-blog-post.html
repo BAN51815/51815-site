@@ -26,9 +26,7 @@
   <label for="title">タイトル</label>
   <input id="title" placeholder="記事のタイトルを入力" type="text"/>
   <label for="category">カテゴリ</label>
-  <select id="category">
-    <option value="">読み込み中...</option>
-  </select>
+  <select id="category"></select>
   <label for="editor">本文</label>
   <div id="editor">ここに本文を書いてください...</div>
   <label for="tags">タグ（カンマ区切り）</label>
@@ -84,20 +82,22 @@
   const categorySelect = document.getElementById("category");
 
   async function loadCategories() {
-    console.log("カテゴリ取得開始");
+    categorySelect.innerHTML = "<option value=''>読み込み中...</option>";
     const { data, error } = await supabase
       .from("blog_categories")
       .select("*")
       .eq("is_visible", true)
       .order("sort_order", { ascending: true });
 
-    if (error || !data) {
+    categorySelect.innerHTML = ""; // 初期化
+
+    if (error || !data || data.length === 0) {
       categorySelect.innerHTML = "<option value=''>カテゴリ取得失敗</option>";
-      console.error("カテゴリ取得失敗:", error);
+      console.error("カテゴリ取得エラー:", error || "データなし");
+      alert("カテゴリの読み込みに失敗しました。");
       return;
     }
 
-    categorySelect.innerHTML = "";
     data.forEach(cat => {
       const opt = document.createElement("option");
       opt.value = cat.name;
