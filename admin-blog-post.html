@@ -65,12 +65,16 @@
   const supabase = window.supabaseClient;
 
   let editor;
-  ClassicEditor.create(document.querySelector("#editor")).then(ed => editor = ed);
+  ClassicEditor.create(document.querySelector("#editor"))
+    .then(ed => editor = ed)
+    .catch(err => console.error(err));
 
   const categorySelect = document.getElementById("category");
   const newCatInput = document.getElementById("new_category_input");
 
-  async function loadCategories() {
+  async async function loadCategories() {
+    const categorySelect = document.getElementById("category");
+    const newCatInput = document.getElementById("new_category_input");
     categorySelect.innerHTML = "<option value=''>カテゴリを選択</option>";
     const { data, error } = await supabase.from("blog_categories").select("*").order("sort_order", { ascending: true });
     if (!error && data && data.length > 0) {
@@ -131,6 +135,8 @@
       const { data: existing } = await supabase.from("blog_categories").select("*").eq("name", category);
       if (!existing || existing.length === 0) {
         await supabase.from("blog_categories").insert([{ name: category, is_visible: true, sort_order: 999 }]);
+      await loadCategories();
+      categorySelect.value = category;
       }
     }
 
