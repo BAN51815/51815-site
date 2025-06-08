@@ -1,21 +1,82 @@
 <div class="page-container">
-<!DOCTYPE html>
-<html lang="ja">
+  <!-- ① スタイル定義 -->
+  <style>
+    .page-container {
+      font-family: 'Helvetica Neue', sans-serif;
+      background: linear-gradient(to right, #f5f7fa, #c3cfe2);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
 
-  <meta charset="UTF-8">
-  <title>管理者ログイン - 51815</title>
-  <link rel="stylesheet" href="style.css">
+    .login-box {
+      background: white;
+      padding: 2.5rem;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
 
+    .login-box h1 {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      color: #333;
+    }
 
-  <h1>51815 管理者ログイン</h1>
-  <form id="login-form">
-    <input type="email" id="email" placeholder="メールアドレス" required><br>
-    <input type="password" id="password" placeholder="パスワード" required><br>
-    <button type="submit">ログイン</button>
-  </form>
-  <div id="message"></div>
+    .login-box input {
+      width: 100%;
+      padding: 0.75rem;
+      margin: 0.5rem 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
 
+    .login-box button {
+      width: 100%;
+      padding: 0.75rem;
+      margin-top: 1rem;
+      background-color: #4a90e2;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .login-box button:hover {
+      background-color: #357ab8;
+    }
+
+    #message {
+      margin-top: 1rem;
+      color: red;
+      font-size: 0.9rem;
+    }
+  </style>
+
+  <!-- ② 本文構造 -->
+  <div class="login-box">
+    <h1>51815 管理者ログイン</h1>
+    <form id="login-form">
+      <input type="email" id="email" placeholder="メールアドレス" required><br>
+      <input type="password" id="password" placeholder="パスワード" required><br>
+      <button type="submit">ログイン</button>
+    </form>
+    <div id="message"></div>
+  </div>
+
+  <!-- ③ 本体スクリプト -->
   <script type="module">
+    import {{ createClient }} from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+    const supabase = createClient(
+      "https://odpjnxcyvcmivmccxtyo.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kcGpueGN5dmNtaXZtY2N4dHlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2MjI0MjQsImV4cCI6MjA2NDE5ODQyNH0.uGSV1BPGvjcjGTtYOg0TwCarGTgdZeVWULSbdis_hsA"
+    );
 
     const form = document.getElementById("login-form");
     const msg = document.getElementById("message");
@@ -25,19 +86,15 @@
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
 
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email, password
-      });
+      const {{ data, error }} = await supabase.auth.signInWithPassword({ email, password });
 
       if (error) {
         msg.textContent = "ログイン失敗：" + error.message;
         return;
       }
 
-      // 認証成功 → フラグ保存して管理画面に進む
       localStorage.setItem("admin_auth", "true");
       window.location.href = "admin-dashboard.html";
     });
   </script>
-
 </div>
