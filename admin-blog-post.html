@@ -144,11 +144,14 @@
       }
     });
 
-    title.addEventListener("input", () => {
+    title.addEventListener("input", generateSlug);
+    title.addEventListener("compositionend", generateSlug);
+
+    function generateSlug() {
       const romaji = wanakana.toRomaji(title.value);
       const slug = romaji.toLowerCase().replace(/[^\w\s-]/g, "").trim().replace(/\s+/g, "-");
       slugInput.value = slug;
-    });
+        }
 
     thumbnailUrl.addEventListener("input", () => {
       if (thumbnailUrl.value) {
