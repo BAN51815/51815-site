@@ -72,8 +72,8 @@
   <label for="title">タイトル</label>
   <input type="text" id="title">
 
-  <label for="body">本文</label>
-  <div id="editor"></div>
+  
+  
 
   <label for="category">カテゴリ</label>
   <select id="category"></select>
@@ -91,8 +91,8 @@
   <input type="file" id="thumbnail_file" accept="image/*">
   <img id="thumbnail-preview" src="" alt="プレビュー表示なし" style="display:none;">
 
-  <label for="body">本文</label>
-  <div id="editor"></div>
+  
+  
 
   <label><input type="checkbox" id="is_visible">公開する</label>
 
@@ -128,9 +128,9 @@
     const submitBtn = document.getElementById("submit-btn");
 
     async function loadCategories() {
-      const { data, error } = await supabase.from("category").select("name");
+      const { data, error } = await supabase.from("blogs").select("category");
       if (error || !data) return;
-      const unique = [...new Set(data.map(row => row.name))];
+      const unique = [...new Set(data.map(row => row.category))];
       categorySelect.innerHTML = "";
       unique.forEach(name => {
         const opt = document.createElement("option");
