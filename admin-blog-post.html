@@ -1,159 +1,184 @@
 <div class="page-container">
   <style>
-    .page-container * { box-sizing: border-box; }
-    * { box-sizing: border-box; }
-    .page-container .container { padding: 1rem; background: #f8f8f8; }
-    h2 { margin-bottom: 1rem; }
-    input, select, textarea, button {
-      padding: 0.5rem; margin: 0.25rem 0; font-size: 1rem; width: 100%;
+    .page-container {
+      font-family: 'Helvetica Neue', sans-serif !important;
+      padding: 1rem;
+      background-color: #f9f9f9;
+      max-width: 800px;
     }
-    label { display: block; margin-top: 1rem; font-weight: bold; }
-    .visibility-row {
-      display: flex; align-items: center; gap: 0.5rem; margin-top: 1rem;
+
+    .page-container h2 {
+      font-size: 1.4rem !important;
+      margin-bottom: 1rem;
+      color: #333;
     }
-    #editor { background: #fff; min-height: 300px; border: 1px solid #ccc; }
-    .submit-area { margin-top: 1.5rem; }
+
+    .page-container label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: bold;
+      font-size: 0.95rem;
+    }
+
+    .page-container input[type="text"],
+    .page-container input[type="url"],
+    .page-container input[type="slug"],
+    .page-container select,
+    .page-container textarea {
+      width: 100% !important;
+      padding: 0.5rem !important;
+      font-size: 0.9rem !important;
+      margin-top: 0.3rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+
+    .page-container input[type="checkbox"] {
+      transform: scale(1.2);
+      margin-right: 0.5rem;
+    }
+
+    .page-container button {
+      margin-top: 1.5rem;
+      padding: 0.6rem 1.2rem;
+      background-color: #4a90e2;
+      color: white;
+      font-size: 0.95rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .page-container button:hover {
+      background-color: #357ab8;
+    }
+
+    .page-container #thumbnail-preview {
+      margin-top: 0.5rem;
+      max-width: 100%;
+      height: auto;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
   </style>
 
-  <div class="container">
-    <h2>ブログ投稿フォーム</h2>
-    <label for="title">タイトル</label>
-    <input id="title" placeholder="記事のタイトルを入力" type="text"/>
-    <label for="category">カテゴリ</label>
-    <select id="category">
-      <option value="">読み込み中...</option>
-    </select>
-    <label for="editor">本文</label>
-    <div id="editor">ここに本文を書いてください...</div>
-    <label for="tags">タグ（カンマ区切り）</label>
-    <input id="tags" placeholder="例: 副業,介護,起業" type="text"/>
-    <label for="thumbnail_url">サムネイル画像URL</label>
-    <input id="thumbnail_url" placeholder="https://...jpg" type="text"/>
-    <label for="thumbnail_file">サムネイル画像アップロード</label>
-    <input accept="image/*" id="thumbnail_file" type="file"/>
-    <label for="slug">カスタムスラッグ（任意）</label>
-    <input id="slug" placeholder="custom-url-slug" type="text"/>
-    <div class="visibility-row">
-      <label for="is_visible">公開</label>
-      <input checked id="is_visible" type="checkbox"/>
-    </div>
-    <div class="submit-area">
-      <button id="submit">投稿する</button>
-    </div>
-  </div>
+  <h2>ブログ投稿</h2>
+
+  <label for="title">タイトル</label>
+  <input type="text" id="title">
+
+  <label for="category">カテゴリ</label>
+  <select id="category"></select>
+  <input type="text" id="category-new" placeholder="新しいカテゴリ名（任意）">
+
+  <label for="tags">タグ（カンマ区切り）</label>
+  <input type="text" id="tags">
+
+  <label for="slug">スラッグ（URL用文字列）</label>
+  <input type="text" id="slug">
+
+  <label for="thumbnail_url">サムネイルURL</label>
+  <input type="url" id="thumbnail_url">
+  <img id="thumbnail-preview" src="" alt="プレビュー表示なし" style="display:none;">
+
+  <label for="body">本文</label>
+  <div id="editor"></div>
+
+  <label><input type="checkbox" id="is_visible">公開する</label>
+
+  <button id="submit-btn">投稿</button>
 
   <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
-  <script src="https://unpkg.com/wanakana"></script>
-
   <script type="module">
-    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-    const supabase = createClient("https://odpjnxcyvcmivmccxtyo.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kcGpueGN5dmNtaXZtY2N4dHlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2MjI0MjQsImV4cCI6MjA2NDE5ODQyNH0.uGSV1BPGvjcjGTtYOg0TwCarGTgdZeVWULSbdis_hsA");
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+    const supabase = createClient(
+      "https://odpjnxcyvcmivmccxtyo.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kcGpueGN5dmNtaXZtY2N4dHlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2MjI0MjQsImV4cCI6MjA2NDE5ODQyNH0.uGSV1BPGvjcjGTtYOg0TwCarGTgdZeVWULSbdis_hsA"
+    );
 
     if (localStorage.getItem("admin_auth") !== "true") {
       window.location.href = "admin-top.html";
     }
 
-    let editor;
-
-    const waitForEditor = () => {
-      if (typeof ClassicEditor === "undefined") {
-        return setTimeout(waitForEditor, 100);
-      }
-      ClassicEditor
-        .create(document.querySelector("#editor"), {
-          toolbar: [
-            'heading', '|',
-            'bold', 'italic', 'underline', '|',
-            'fontColor', 'fontBackgroundColor', 'fontSize', 'fontFamily', '|',
-            'link', 'imageUpload', 'insertTable', 'mediaEmbed', 'blockQuote', '|',
-            'bulletedList', 'numberedList', 'alignment', 'horizontalLine', '|',
-            'undo', 'redo'
-          ]
-        })
-        .then(ed => editor = ed)
-        .catch(err => console.error(err));
-    };
-    waitForEditor();
-
+    const title = document.getElementById("title");
     const categorySelect = document.getElementById("category");
+    const categoryNew = document.getElementById("category-new");
+    const tags = document.getElementById("tags");
+    const slug = document.getElementById("slug");
+    const thumbnail = document.getElementById("thumbnail_url");
+    const preview = document.getElementById("thumbnail-preview");
+    const isVisible = document.getElementById("is_visible");
+    const submitBtn = document.getElementById("submit-btn");
+
+    let editorInstance;
+
+    ClassicEditor.create(document.querySelector("#editor"))
+      .then(editor => { editorInstance = editor; })
+      .catch(err => console.error(err));
 
     async function loadCategories() {
-      const { data, error } = await supabase
-        .from("categories")
-        .select("*")
-        .eq("is_visible", true)
-        .order("sort_order", { ascending: true });
-
-      if (error || !data) {
-        categorySelect.innerHTML = "<option value=''>カテゴリ取得失敗</option>";
-        console.error("カテゴリ取得失敗:", error);
-        return;
-      }
-
+      const { data, error } = await supabase.from("categories").select("name");
+      if (error) return;
+      const unique = [...new Set(data.map(row => row.name))];
       categorySelect.innerHTML = "";
-      data.forEach(cat => {
+      unique.forEach(name => {
         const opt = document.createElement("option");
-        opt.value = cat.name;
-        opt.textContent = cat.name;
+        opt.value = name;
+        opt.textContent = name;
         categorySelect.appendChild(opt);
       });
     }
 
-    loadCategories();
-
-    document.getElementById("title").addEventListener("input", () => {
-      const title = document.getElementById("title").value;
-      const romaji = wanakana.toRomaji(title);
-      const slug = romaji
-        .toLowerCase()
-        .replace(/[^\w\s-]/g, "")
-        .trim()
-        .replace(/\s+/g, "-");
-      document.getElementById("slug").value = slug;
+    categoryNew.addEventListener("change", () => {
+      if (categoryNew.value && ![...categorySelect.options].some(o => o.value === categoryNew.value)) {
+        const opt = document.createElement("option");
+        opt.value = categoryNew.value;
+        opt.textContent = categoryNew.value;
+        categorySelect.appendChild(opt);
+        categorySelect.value = categoryNew.value;
+      }
     });
 
-    document.getElementById("submit").addEventListener("click", async () => {
-      const title = document.getElementById("title").value.trim();
+    thumbnail.addEventListener("input", () => {
+      if (thumbnail.value) {
+        preview.src = thumbnail.value;
+        preview.style.display = "block";
+      } else {
+        preview.style.display = "none";
+      }
+    });
+
+    submitBtn.addEventListener("click", async () => {
       const category = categorySelect.value;
-      const tags = document.getElementById("tags").value.trim();
-      const is_visible = document.getElementById("is_visible").checked;
-      const body = editor.getData().trim();
-
-      if (!title || !body || !category) {
-        alert("タイトル・カテゴリ・本文は必須です");
-        return;
-      }
-
-      let slug = document.getElementById("slug").value.trim();
-      if (!slug) {
-        const romaji = wanakana.toRomaji(title);
-        slug = romaji.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9\-]/g, '');
-      }
-
-      let thumbnail_url = document.getElementById("thumbnail_url").value.trim();
-      const fileInput = document.getElementById("thumbnail_file");
-      if (fileInput.files.length > 0) {
-        const file = fileInput.files[0];
-        const fileName = `thumbnails/${slug}-${Date.now()}-${file.name}`;
-        const { error: uploadError } = await supabase.storage.from("thumbnails").upload(fileName, file);
-        if (uploadError) {
-          alert("画像アップロードに失敗しました: " + uploadError.message);
-          return;
-        }
-        const { data: publicUrlData } = supabase.storage.from("thumbnails").getPublicUrl(fileName);
-        thumbnail_url = publicUrlData.publicUrl;
-      }
+      const body = editorInstance.getData();
 
       const { error } = await supabase.from("blogs").insert([{
-        title, category, tags, is_visible, body, slug, thumbnail_url
+        title: title.value,
+        category: category,
+        tags: tags.value,
+        slug: slug.value,
+        body: body,
+        thumbnail_url: thumbnail.value,
+        is_visible: isVisible.checked
       }]);
 
       if (error) {
-        alert("投稿に失敗しました: " + error.message);
+        alert("投稿失敗：" + error.message);
       } else {
         alert("投稿が完了しました");
-        location.reload();
+        title.value = "";
+        tags.value = "";
+        slug.value = "";
+        thumbnail.value = "";
+        preview.style.display = "none";
+        isVisible.checked = false;
+        editorInstance.setData("");
+        categoryNew.value = "";
+        loadCategories();
       }
     });
+
+    loadCategories();
   </script>
 </div>
