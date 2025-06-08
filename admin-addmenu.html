@@ -1,97 +1,144 @@
 <div class="page-container">
-<style>
-.page-container * { box-sizing: border-box; }
-  * { box-sizing: border-box; }
-  .page-container .container { font-family: sans-serif; margin: 0; }
-  h2 { margin: 0 0 1rem; }
-  input, button { padding: 0.5rem; margin: 0.25rem; font-size: 1rem; }
-  .page-container table { width: 100%; border-collapse: collapse; margin-top: 1rem; background: #fff; }
-  .page-container th, .page-container td { border: 1px solid #ccc; padding: 0.5rem; text-align: left; }
-  th { background: #eee; }
-  .actions button { margin-right: 0.5rem; }
-</style>
-
-<h2>管理メニュー追加</h2>
-
-<div>
-  <input id="title" placeholder="タイトル">
-  <input id="path" placeholder="HTMLファイル名（例: sample.html）">
-  <input id="order" type="number" placeholder="順番">
-  <button id="add-btn">追加</button>
-</div>
-
-<table>
-  <thead>
-    <tr><th>タイトル</th><th>パス</th><th>順番</th><th>操作</th></tr>
-  </thead>
-  <tbody id="menu-list"></tbody>
-</table>
-
-<script type="module">
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-const supabase = createClient("https://odpjnxcyvcmivmccxtyo.supabase.co", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kcGpueGN5dmNtaXZtY2N4dHlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2MjI0MjQsImV4cCI6MjA2NDE5ODQyNH0.uGSV1BPGvjcjGTtYOg0TwCarGTgdZeVWULSbdis_hsA");
-
-  if (localStorage.getItem("admin_auth") !== "true") {
-    window.location.href = "admin-top.html";
-  }
-
-
-  const title = document.getElementById("title");
-  const path = document.getElementById("path");
-  const order = document.getElementById("order");
-  const list = document.getElementById("menu-list");
-  const addBtn = document.getElementById("add-btn");
-
-  async function loadMenus() {
-    const { data, error } = await supabase.from("admin_menus").select("*").order("order");
-    if (error) {
-      alert("読み込み失敗: " + error.message);
-      return;
+  <style>
+    .page-container {
+      font-family: 'Helvetica Neue', sans-serif;
+      padding: 1rem;
+      background-color: #f9f9f9;
     }
 
-    list.innerHTML = "";
-    data.forEach(row => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td><input value="${row.title}" data-id="${row.id}" data-field="title"></td>
-        <td><input value="${row.path}" data-id="${row.id}" data-field="path"></td>
-        <td><input type="number" value="${row.order}" data-id="${row.id}" data-field="order"></td>
-        <td class="actions">
-          <button onclick="updateRow(${row.id})">保存</button>
-          <button onclick="deleteRow(${row.id})">削除</button>
-        </td>`;
-      list.appendChild(tr);
-    });
-  }
-
-  window.updateRow = async (id) => {
-    const inputs = document.querySelectorAll('[data-id="' + id + '"]');
-    const updateData = {};
-    inputs.forEach(input => {
-      updateData[input.dataset.field] = input.value;
-    });
-    const { error } = await supabase.from("admin_menus").update(updateData).eq("id", id);
-    if (error) alert("更新失敗: " + error.message);
-    else loadMenus();
-  };
-
-  window.deleteRow = async (id) => {
-    if (!confirm("削除してもよいですか？")) return;
-    const { error } = await supabase.from("admin_menus").delete().eq("id", id);
-    if (error) alert("削除失敗: " + error.message);
-    else loadMenus();
-  };
-
-  addBtn.onclick = async () => {
-    if (!title.value || !path.value || !order.value) return alert("全ての項目を入力してください");
-    const { error } = await supabase.from("admin_menus").insert([{ title: title.value, path: path.value, order: parseInt(order.value) }]);
-    if (error) alert("追加失敗: " + error.message);
-    else {
-      title.value = path.value = order.value = "";
-      loadMenus();
+    h2 {
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+      color: #333;
     }
-  };
 
-  loadMenus();
-</script>
+    input, button {
+      padding: 0.4rem 0.6rem;
+      margin: 0.3rem 0.2rem;
+      font-size: 0.95rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    button {
+      background-color: #4a90e2;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #357ab8;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      background: #fff;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 0.4rem 0.6rem;
+      text-align: left;
+    }
+
+    th {
+      background: #eee;
+    }
+
+    .actions button {
+      margin-right: 0.3rem;
+      font-size: 0.85rem;
+      padding: 0.3rem 0.6rem;
+    }
+  </style>
+
+  <h2>管理メニュー追加</h2>
+
+  <div>
+    <input id="title" placeholder="タイトル">
+    <input id="path" placeholder="HTMLファイル名（例: sample.html）">
+    <input id="order" type="number" placeholder="順番">
+    <button id="add-btn">追加</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>タイトル</th><th>パス</th><th>順番</th><th>操作</th></tr>
+    </thead>
+    <tbody id="menu-list"></tbody>
+  </table>
+
+  <script type="module">
+    if (localStorage.getItem("admin_auth") !== "true") {
+      window.location.href = "admin-top.html";
+    }
+
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+    const supabase = createClient(
+      "https://odpjnxcyvcmivmccxtyo.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9kcGpueGN5dmNtaXZtY2N4dHlvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2MjI0MjQsImV4cCI6MjA2NDE5ODQyNH0.uGSV1BPGvjcjGTtYOg0TwCarGTgdZeVWULSbdis_hsA"
+    );
+
+    const title = document.getElementById("title");
+    const path = document.getElementById("path");
+    const order = document.getElementById("order");
+    const list = document.getElementById("menu-list");
+    const addBtn = document.getElementById("add-btn");
+
+    async function loadMenus() {
+      const { data, error } = await supabase.from("admin_menus").select("*").order("order");
+      if (error) {
+        alert("読み込み失敗: " + error.message);
+        return;
+      }
+
+      list.innerHTML = "";
+      data.forEach(row => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><input value="\${row.title}" data-id="\${row.id}" data-field="title" style="width: 100%;"></td>
+          <td><input value="\${row.path}" data-id="\${row.id}" data-field="path" style="width: 100%;"></td>
+          <td><input type="number" value="\${row.order}" data-id="\${row.id}" data-field="order" style="width: 100%;"></td>
+          <td class="actions">
+            <button onclick="updateRow(\${row.id})">保存</button>
+            <button onclick="deleteRow(\${row.id})">削除</button>
+          </td>`;
+        list.appendChild(tr);
+      });
+    }
+
+    window.updateRow = async (id) => {
+      const inputs = document.querySelectorAll('[data-id="' + id + '"]');
+      const updateData = {};
+      inputs.forEach(input => {
+        updateData[input.dataset.field] = input.value;
+      });
+      const { error } = await supabase.from("admin_menus").update(updateData).eq("id", id);
+      if (error) alert("更新失敗: " + error.message);
+      else loadMenus();
+    };
+
+    window.deleteRow = async (id) => {
+      if (!confirm("削除してもよいですか？")) return;
+      const { error } = await supabase.from("admin_menus").delete().eq("id", id);
+      if (error) alert("削除失敗: " + error.message);
+      else loadMenus();
+    };
+
+    addBtn.onclick = async () => {
+      if (!title.value || !path.value || !order.value) return alert("全ての項目を入力してください");
+      const { error } = await supabase.from("admin_menus").insert([{ title: title.value, path: path.value, order: parseInt(order.value) }]);
+      if (error) alert("追加失敗: " + error.message);
+      else {
+        title.value = path.value = order.value = "";
+        loadMenus();
+      }
+    };
+
+    loadMenus();
+  </script>
 </div>
