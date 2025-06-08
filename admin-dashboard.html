@@ -1,20 +1,38 @@
 <!DOCTYPE html>
-<!-- 管理ダッシュボード（修正版） -->
+<!-- 管理ダッシュボード（nav幅を強制固定） -->
 <head>
   <meta charset="UTF-8">
   <title>管理ダッシュボード - 51815</title>
   <link rel="stylesheet" href="style.css">
   <style>
     body { display: flex; font-family: sans-serif; height: 100vh; margin: 0; }
-    nav { width: 220px; background: #222; color: #fff; padding: 1rem; }
-    nav button { display: block; width: 100%; margin: 0.5rem 0; padding: 0.5rem; font-size: 1rem; background: #444; color: #fff; border: none; cursor: pointer; }
-    nav button:hover { background: #666; }
+    nav {
+      width: 220px;
+      flex-shrink: 0; /* ← メニュー幅固定 */
+      background: #222;
+      color: #fff;
+      padding: 1rem;
+    }
+    nav button {
+      display: block;
+      width: 100%;
+      margin: 0.5rem 0;
+      padding: 0.5rem;
+      font-size: 1rem;
+      background: #444;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+    nav button:hover {
+      background: #666;
+    }
     main {
       flex: 1;
       padding: 1rem;
       overflow: auto;
       background: #f0f0f0;
-      min-width: 0; /* ← メニュー潰れ防止 */
+      min-width: 0;
     }
     #content-area .page-container {
       max-width: 100%;
@@ -68,7 +86,6 @@
         const html = await res.text();
         contentArea.innerHTML = html;
 
-        // 再実行が必要な <script type="module">
         const moduleScripts = contentArea.querySelectorAll("script[type='module']");
         moduleScripts.forEach(old => {
           const newScript = document.createElement("script");
@@ -77,7 +94,6 @@
           document.body.appendChild(newScript);
         });
 
-        // CDNなど <script src="..."> も再実行
         const externalScripts = contentArea.querySelectorAll("script[src]");
         externalScripts.forEach(old => {
           const newScript = document.createElement("script");
