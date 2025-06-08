@@ -72,12 +72,13 @@
   <label for="title">タイトル</label>
   <input type="text" id="title">
 
-  
-  
+  <label for="body">本文</label>
+  <div id="editor"></div>
 
-  <label for="category">カテゴリ</label>
-  <select id="category"></select>
-  <input type="text" id="category-new" placeholder="新しいカテゴリ名（任意）">
+  <label for="category-input">カテゴリ（自由記述）</label>
+  <input type="text" id="category-input">
+  <label for="category-select">既存カテゴリから選ぶ（選択すると上書きされます）</label>
+  <select id="category-select"></select>
 
   <label for="tags">タグ（カンマ区切り）</label>
   <input type="text" id="tags">
@@ -90,9 +91,6 @@
   <label for="thumbnail_file">画像アップロード</label>
   <input type="file" id="thumbnail_file" accept="image/*">
   <img id="thumbnail-preview" src="" alt="プレビュー表示なし" style="display:none;">
-
-  
-  
 
   <label><input type="checkbox" id="is_visible">公開する</label>
 
@@ -117,8 +115,8 @@
       .catch(err => console.error(err));
 
     const title = document.getElementById("title");
-    const categorySelect = document.getElementById("category");
-    const categoryNew = document.getElementById("category-new");
+    const categoryInput = document.getElementById("category-input");
+    const categorySelect = document.getElementById("category-select");
     const tags = document.getElementById("tags");
     const slugInput = document.getElementById("slug");
     const thumbnailUrl = document.getElementById("thumbnail_url");
@@ -130,7 +128,7 @@
     async function loadCategories() {
       const { data, error } = await supabase.from("blogs").select("category");
       if (error || !data) return;
-      const unique = [...new Set(data.map(row => row.category))];
+      const unique = [...new Set(data.map(row => row.category).filter(Boolean))];
       categorySelect.innerHTML = "";
       unique.forEach(name => {
         const opt = document.createElement("option");
@@ -140,13 +138,9 @@
       });
     }
 
-    categoryNew.addEventListener("change", () => {
-      if (categoryNew.value && ![...categorySelect.options].some(o => o.value === categoryNew.value)) {
-        const opt = document.createElement("option");
-        opt.value = categoryNew.value;
-        opt.textContent = categoryNew.value;
-        categorySelect.appendChild(opt);
-        categorySelect.value = categoryNew.value;
+    categorySelect.addEventListener("change", () => {
+      if (categorySelect.value) {
+        categoryInput.value = categorySelect.value;
       }
     });
 
@@ -183,7 +177,7 @@
 
       const { error } = await supabase.from("blogs").insert([{
         title: title.value,
-        category: categorySelect.value,
+        category: categoryInput.value,
         tags: tags.value,
         slug: slugInput.value,
         body: body,
@@ -194,7 +188,7 @@
       if (error) alert("投稿失敗：" + error.message);
       else {
         alert("投稿完了！");
-        title.value = tags.value = slugInput.value = thumbnailUrl.value = categoryNew.value = "";
+        title.value = tags.value = slugInput.value = thumbnailUrl.value = categoryInput.value = "";
         preview.style.display = "none";
         isVisible.checked = false;
         editorInstance.setData("");
