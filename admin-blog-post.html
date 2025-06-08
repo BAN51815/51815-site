@@ -22,9 +22,8 @@
 
     .page-container input[type="text"],
     .page-container input[type="url"],
-    .page-container input[type="slug"],
-    .page-container select,
-    .page-container textarea {
+    .page-container input[type="file"],
+    .page-container select {
       width: 100% !important;
       padding: 0.5rem !important;
       font-size: 0.9rem !important;
@@ -61,6 +60,11 @@
       border: 1px solid #ccc;
       border-radius: 4px;
     }
+
+    #editor {
+      border: 1px solid #ccc;
+      margin-top: 0.5rem;
+    }
   </style>
 
   <h2>ブログ投稿</h2>
@@ -80,6 +84,8 @@
 
   <label for="thumbnail_url">サムネイルURL</label>
   <input type="url" id="thumbnail_url">
+  <label for="thumbnail_file">画像アップロード</label>
+  <input type="file" id="thumbnail_file" accept="image/*">
   <img id="thumbnail-preview" src="" alt="プレビュー表示なし" style="display:none;">
 
   <label for="body">本文</label>
@@ -90,6 +96,7 @@
   <button id="submit-btn">投稿</button>
 
   <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+  <script src="https://unpkg.com/wanakana"></script>
   <script type="module">
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
     const supabase = createClient(
@@ -101,25 +108,25 @@
       window.location.href = "admin-top.html";
     }
 
+    let editorInstance;
+    ClassicEditor.create(document.querySelector("#editor"))
+      .then(editor => editorInstance = editor)
+      .catch(err => console.error(err));
+
     const title = document.getElementById("title");
     const categorySelect = document.getElementById("category");
     const categoryNew = document.getElementById("category-new");
     const tags = document.getElementById("tags");
-    const slug = document.getElementById("slug");
-    const thumbnail = document.getElementById("thumbnail_url");
+    const slugInput = document.getElementById("slug");
+    const thumbnailUrl = document.getElementById("thumbnail_url");
+    const thumbnailFile = document.getElementById("thumbnail_file");
     const preview = document.getElementById("thumbnail-preview");
     const isVisible = document.getElementById("is_visible");
     const submitBtn = document.getElementById("submit-btn");
 
-    let editorInstance;
-
-    ClassicEditor.create(document.querySelector("#editor"))
-      .then(editor => { editorInstance = editor; })
-      .catch(err => console.error(err));
-
     async function loadCategories() {
       const { data, error } = await supabase.from("categories").select("name");
-      if (error) return;
+      if (error || !data) return;
       const unique = [...new Set(data.map(row => row.name))];
       categorySelect.innerHTML = "";
       unique.forEach(name => {
@@ -140,9 +147,15 @@
       }
     });
 
-    thumbnail.addEventListener("input", () => {
-      if (thumbnail.value) {
-        preview.src = thumbnail.value;
+    title.addEventListener("input", () => {
+      const romaji = wanakana.toRomaji(title.value);
+      const slug = romaji.toLowerCase().replace(/[^\w\s-]/g, "").trim().replace(/\s+/g, "-");
+      slugInput.value = slug;
+    });
+
+    thumbnailUrl.addEventListener("input", () => {
+      if (thumbnailUrl.value) {
+        preview.src = thumbnailUrl.value;
         preview.style.display = "block";
       } else {
         preview.style.display = "none";
@@ -150,31 +163,38 @@
     });
 
     submitBtn.addEventListener("click", async () => {
-      const category = categorySelect.value;
       const body = editorInstance.getData();
+      const file = thumbnailFile.files[0];
+      let finalThumb = thumbnailUrl.value;
+
+      if (file) {
+        const fileName = `thumbnails/${slugInput.value}-${Date.now()}-${file.name}`;
+        const { error: uploadError } = await supabase.storage.from("thumbnails").upload(fileName, file);
+        if (uploadError) {
+          alert("画像アップロード失敗：" + uploadError.message);
+          return;
+        }
+        const { data: urlData } = supabase.storage.from("thumbnails").getPublicUrl(fileName);
+        finalThumb = urlData.publicUrl;
+      }
 
       const { error } = await supabase.from("blogs").insert([{
         title: title.value,
-        category: category,
+        category: categorySelect.value,
         tags: tags.value,
-        slug: slug.value,
+        slug: slugInput.value,
         body: body,
-        thumbnail_url: thumbnail.value,
+        thumbnail_url: finalThumb,
         is_visible: isVisible.checked
       }]);
 
-      if (error) {
-        alert("投稿失敗：" + error.message);
-      } else {
-        alert("投稿が完了しました");
-        title.value = "";
-        tags.value = "";
-        slug.value = "";
-        thumbnail.value = "";
+      if (error) alert("投稿失敗：" + error.message);
+      else {
+        alert("投稿完了！");
+        title.value = tags.value = slugInput.value = thumbnailUrl.value = categoryNew.value = "";
         preview.style.display = "none";
         isVisible.checked = false;
         editorInstance.setData("");
-        categoryNew.value = "";
         loadCategories();
       }
     });
