@@ -72,6 +72,9 @@
   <label for="title">タイトル</label>
   <input type="text" id="title">
 
+  <label for="body">本文</label>
+  <div id="editor"></div>
+
   <label for="category">カテゴリ</label>
   <select id="category"></select>
   <input type="text" id="category-new" placeholder="新しいカテゴリ名（任意）">
@@ -125,7 +128,7 @@
     const submitBtn = document.getElementById("submit-btn");
 
     async function loadCategories() {
-      const { data, error } = await supabase.from("categories").select("name");
+      const { data, error } = await supabase.from("category").select("name");
       if (error || !data) return;
       const unique = [...new Set(data.map(row => row.name))];
       categorySelect.innerHTML = "";
