@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- 管理ダッシュボード（完全版） -->
+<!-- 管理ダッシュボード（修正版） -->
 <head>
   <meta charset="UTF-8">
   <title>管理ダッシュボード - 51815</title>
@@ -9,7 +9,18 @@
     nav { width: 220px; background: #222; color: #fff; padding: 1rem; }
     nav button { display: block; width: 100%; margin: 0.5rem 0; padding: 0.5rem; font-size: 1rem; background: #444; color: #fff; border: none; cursor: pointer; }
     nav button:hover { background: #666; }
-    main { flex: 1; padding: 1rem; overflow: auto; background: #f0f0f0; }
+    main {
+      flex: 1;
+      padding: 1rem;
+      overflow: auto;
+      background: #f0f0f0;
+      min-width: 0; /* ← メニュー潰れ防止 */
+    }
+    #content-area .page-container {
+      max-width: 100%;
+      overflow-wrap: break-word;
+      word-break: break-word;
+    }
   </style>
 </head>
 <body>
