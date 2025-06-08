@@ -144,8 +144,8 @@
       }
     });
 
-    title.addEventListener("input", generateSlug);
-    title.addEventListener("compositionend", generateSlug);
+    
+    
 
     function generateSlug() {
       const romaji = wanakana.toRomaji(title.value);
@@ -176,6 +176,16 @@
         }
         const { data: urlData } = supabase.storage.from("thumbnails").getPublicUrl(fileName);
         finalThumb = urlData.publicUrl;
+      }
+
+      const { data: existing } = await supabase
+        .from("blogs")
+        .select("id")
+        .eq("slug", slugInput.value);
+
+      if (existing.length > 0) {
+        alert("このslugは既に使用されています。別の値を入力してください。");
+        return;
       }
 
       const { error } = await supabase.from("blogs").insert([{
