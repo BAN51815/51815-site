@@ -105,12 +105,12 @@
       data.forEach(row => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td><input value="\${row.title}" data-id="\${row.id}" data-field="title" style="width: 100%; max-width: 140px;"></td>
-          <td><input value="\${row.path}" data-id="\${row.id}" data-field="path" style="width: 100%; max-width: 180px;"></td>
-          <td><input type="number" value="\${row.order}" data-id="\${row.id}" data-field="order" style="width: 100%; max-width: 60px;"></td>
+          <td><input value="${row.title}" data-id="${row.id}" data-field="title" style="width: 100%; max-width: 140px;"></td>
+          <td><input value="${row.path}" data-id="${row.id}" data-field="path" style="width: 100%; max-width: 180px;"></td>
+          <td><input type="number" value="${row.order}" data-id="${row.id}" data-field="order" style="width: 100%; max-width: 60px;"></td>
           <td class="actions">
-            <button onclick="updateRow(\${row.id})">保存</button>
-            <button onclick="deleteRow(\${row.id})">削除</button>
+            <button onclick="updateRow(${row.id})">保存</button>
+            <button onclick="deleteRow(${row.id})">削除</button>
           </td>`;
         list.appendChild(tr);
       });
